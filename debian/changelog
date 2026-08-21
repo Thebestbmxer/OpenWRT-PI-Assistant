@@ -1,4 +1,4 @@
-openwrt-pi-controller (0.2.0-4) unstable; urgency=medium
+openwrt-pi-controller (0.2.0-5) unstable; urgency=medium
 
   * Initial Debian package for the OpenWrt Pi Controller.
   * Package the M0.2 application foundation.
