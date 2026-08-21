@@ -7,6 +7,6 @@
     "\\src\\openwrt_controller",
     "\\tests"
   ],
-  "SelectedNode": "\\tests\\test_database.py",
+  "SelectedNode": "\\tests\\test_app.py",
   "PreviewInSolutionExplorer": false
 }
