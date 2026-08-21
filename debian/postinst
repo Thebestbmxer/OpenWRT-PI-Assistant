@@ -10,7 +10,7 @@ if [ "$1" = "configure" ]; then
         adduser --system \
             --ingroup openwrt-controller \
             --no-create-home \
-            --disabled-login \
+            --shell /usr/sbin/nologin \
             openwrt-controller
     fi
 

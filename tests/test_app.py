@@ -1,6 +1,10 @@
 import sqlite3
 
+import os
+
+os.environ["OPENWRT_CONTROLLER_DATA_DIR"] = "/tmp/openwrt-pi-controller-test"
 from openwrt_controller.app import create_app
+
 
 def test_create_app():
     app = create_app()
