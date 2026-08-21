@@ -16,14 +16,18 @@ class Config:
     )
 
     # Paths
-    DATA_DIR = Path(
-        os.getenv(
-            "OPENWRT_CONTROLLER_DATA_DIR",
-            Path.home() / ".local" / "share" / "openwrt-pi-controller",
+    @classmethod
+    def get_data_dir(cls):
+        return Path(
+            os.getenv(
+                "OPENWRT_CONTROLLER_DATA_DIR",
+                "/var/lib/openwrt-pi-controller",
+            )
         )
-    )
 
-    DATABASE_PATH = DATA_DIR / "controller.db"
+    @classmethod
+    def get_database_path(cls):
+        return cls.get_data_dir() / "controller.d
 
     # Web application
     HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "0.0.0.0")
