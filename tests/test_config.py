@@ -21,7 +21,7 @@ def test_default_openwrt_user():
 
 
 def test_database_path_is_inside_data_directory():
-    assert Config.DATABASE_PATH.parent == Config.DATA_DIR
+    assert Config.get_database_path().parent == Config.get_data_dir()
     
 def test_default_data_directory():
-    assert str(Config.DATA_DIR) == "/var/lib/openwrt-pi-controller"
+    assert str(Config.get_data_dir()) == "/var/lib/openwrt-pi-controller"
