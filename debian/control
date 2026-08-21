@@ -15,6 +15,7 @@ Architecture: all
 Depends:
  ${python3:Depends},
  ${misc:Depends},
+ adduser,
  python3-flask
 Description: Raspberry Pi controller for OpenWrt devices
  Raspberry Pi based management and control application for OpenWrt

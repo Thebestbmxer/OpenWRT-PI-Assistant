@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if ! getent passwd openwrt-controller >/dev/null; then
+    adduser \
+        --system \
+        --group \
+        --home /var/lib/openwrt-pi-controller \
+        --no-create-home \
+        --shell /usr/sbin/nologin \
+        openwrt-controller
+fi
+
+exit 0
