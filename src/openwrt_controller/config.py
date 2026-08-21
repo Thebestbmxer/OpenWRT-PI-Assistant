@@ -27,7 +27,7 @@ class Config:
 
     @classmethod
     def get_database_path(cls):
-        return cls.get_data_dir() / "controller.d
+        return cls.get_data_dir() / "controller.db"
 
     # Web application
     HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "0.0.0.0")
