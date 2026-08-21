@@ -1,5 +1,4 @@
 import sqlite3
-
 import pytest
 
 @pytest.fixture(autouse=True)

@@ -19,7 +19,7 @@ class Config:
     DATA_DIR = Path(
         os.getenv(
             "OPENWRT_CONTROLLER_DATA_DIR",
-            "/var/lib/openwrt-pi-controller",
+            Path.home() / ".local" / "share" / "openwrt-pi-controller",
         )
     )
 
