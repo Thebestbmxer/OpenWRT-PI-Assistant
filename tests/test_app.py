@@ -1,8 +1,16 @@
 import sqlite3
 
 import os
+import pytest
 
-os.environ["OPENWRT_CONTROLLER_DATA_DIR"] = "/tmp/openwrt-pi-controller-test"
+
+@pytest.fixture(autouse=True)
+def test_environment(tmp_path, monkeypatch):
+    monkeypatch.setenv(
+        "OPENWRT_CONTROLLER_DATA_DIR",
+        str(tmp_path / "openwrt-pi-controller-test"),
+    )
+
 from openwrt_controller.app import create_app
 
 
