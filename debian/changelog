@@ -1,0 +1,7 @@
+openwrt-pi-controller (0.2.0-1) unstable; urgency=medium
+
+  * Initial Debian package for the OpenWrt Pi Controller.
+  * Package the M0.2 application foundation.
+  * Provide Flask application and controller executable.
+
+ -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Fri, 21 Aug 2026 12:00:00 -0700
