@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ]; then
+    if getent passwd openwrt-controller >/dev/null; then
+        deluser --system openwrt-controller || true
+    fi
+
+    if getent group openwrt-controller >/dev/null; then
+        delgroup --system openwrt-controller || true
+    fi
+
+    rm -rf /var/lib/openwrt-pi-controller
+fi
+
+exit 0
