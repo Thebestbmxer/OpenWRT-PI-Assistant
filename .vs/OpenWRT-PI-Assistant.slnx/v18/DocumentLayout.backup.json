@@ -3,36 +3,24 @@
   "WorkspaceRootPath": "E:\\github\\OpenWRT-PI-Assistant\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\test_config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\test_config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\app.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\app.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\.github\\workflows\\test.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.github\\workflows\\test.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\.gitignore||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\tests\\test_version.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:tests\\test_version.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\__init__.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\__init__.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\openwrt_controller\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,20 +38,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "test_config.py",
-              "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\test_config.py",
-              "RelativeDocumentMoniker": "src\\openwrt_controller\\test_config.py",
-              "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\test_config.py",
-              "RelativeToolTip": "src\\openwrt_controller\\test_config.py",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "app.py",
+              "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\app.py",
+              "RelativeDocumentMoniker": "src\\openwrt_controller\\app.py",
+              "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\app.py",
+              "RelativeToolTip": "src\\openwrt_controller\\app.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T03:39:19.462Z",
+              "WhenOpened": "2026-08-21T03:45:58.925Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "config.py",
               "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\config.py",
               "RelativeDocumentMoniker": "src\\openwrt_controller\\config.py",
@@ -71,19 +59,8 @@
               "RelativeToolTip": "src\\openwrt_controller\\config.py",
               "ViewState": "AgIAABMAAAAAAAAAAAAmwCcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T03:37:00.866Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "test.yml",
-              "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\.github\\workflows\\test.yml",
-              "RelativeDocumentMoniker": ".github\\workflows\\test.yml",
-              "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\.github\\workflows\\test.yml",
-              "RelativeToolTip": ".github\\workflows\\test.yml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2026-08-21T03:08:41.908Z"
+              "WhenOpened": "2026-08-21T03:37:00.866Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -99,43 +76,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "test_version.py",
-              "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\tests\\test_version.py",
-              "RelativeDocumentMoniker": "tests\\test_version.py",
-              "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\tests\\test_version.py",
-              "RelativeToolTip": "tests\\test_version.py",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T02:56:52.758Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 0,
               "Title": "main.py",
               "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\main.py",
               "RelativeDocumentMoniker": "src\\openwrt_controller\\main.py",
               "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\main.py",
               "RelativeToolTip": "src\\openwrt_controller\\main.py",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T01:50:51.748Z"
+              "WhenOpened": "2026-08-21T01:50:51.748Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "__init__.py",
-              "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\__init__.py",
-              "RelativeDocumentMoniker": "src\\openwrt_controller\\__init__.py",
-              "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\src\\openwrt_controller\\__init__.py",
-              "RelativeToolTip": "src\\openwrt_controller\\__init__.py",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAALAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T01:49:57.273Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "pyproject.toml",
               "DocumentMoniker": "E:\\github\\OpenWRT-PI-Assistant\\pyproject.toml",
               "RelativeDocumentMoniker": "pyproject.toml",

@@ -21,7 +21,7 @@ class Config:
     DATABASE_PATH = DATA_DIR / "controller.db"
 
     # Web application
-    HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "127.0.0.1")
+    HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "0.0.0.0")
     PORT = int(os.getenv("OPENWRT_CONTROLLER_PORT", "8080"))
 
     # OpenWrt SSH connection
