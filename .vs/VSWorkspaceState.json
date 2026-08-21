@@ -4,6 +4,6 @@
     "\\src",
     "\\src\\openwrt_pi-assistant"
   ],
-  "SelectedNode": "\\src\\openwrt_pi-assistant\\main.py",
+  "SelectedNode": "\\src\\openwrt_pi-assistant\\__init__.py",
   "PreviewInSolutionExplorer": false
 }

@@ -10,7 +10,7 @@ version = "0.1.0"
 description = "Raspberry Pi controller for OpenWrt devices"
 requires-python = ">=3.11"
 dependencies = [
-    "flask>=3.0,<4.0",
+	"flask>=3.0,<4.0",
 ]
 
 [project.scripts]
