@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\openwrt_controller"
+    "\\src\\openwrt_controller",
+    "\\tests"
   ],
-  "SelectedNode": "\\src\\openwrt_controller\\main.py",
+  "SelectedNode": "\\src\\openwrt_controller\\__init__.py",
   "PreviewInSolutionExplorer": false
 }
