@@ -7,6 +7,6 @@
     "\\src\\openwrt_controller",
     "\\tests"
   ],
-  "SelectedNode": "\\.github\\workflows\\test.yml",
+  "SelectedNode": "\\src\\openwrt_controller\\test_config.py",
   "PreviewInSolutionExplorer": false
 }
