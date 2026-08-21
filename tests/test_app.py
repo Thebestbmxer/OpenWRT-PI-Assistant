@@ -19,7 +19,7 @@ def test_index():
     assert response.status_code == 200
     assert response.data == b"OpenWrt Pi Controller"
 
-    def test_create_app_initializes_database(tmp_path):
+def test_create_app_initializes_database(tmp_path):
     class TestConfig:
         HOST = "127.0.0.1"
         PORT = 8080

@@ -40,7 +40,7 @@
               "RelativeDocumentMoniker": "tests\\test_app.py",
               "ToolTip": "E:\\github\\OpenWRT-PI-Assistant\\tests\\test_app.py",
               "RelativeToolTip": "tests\\test_app.py",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAADEAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-08-21T04:30:33.935Z",
               "EditorCaption": ""
@@ -55,8 +55,7 @@
               "RelativeToolTip": "src\\openwrt_controller\\app.py",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T04:29:36.713Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-21T04:29:36.713Z"
             },
             {
               "$type": "Document",
@@ -68,8 +67,7 @@
               "RelativeToolTip": "tests\\test_database.py",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T04:23:32.026Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-21T04:23:32.026Z"
             },
             {
               "$type": "Document",
@@ -81,8 +79,7 @@
               "RelativeToolTip": "src\\openwrt_controller\\database.py",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAAB8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-21T04:21:05.033Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-21T04:21:05.033Z"
             }
           ]
         }
