@@ -1,10 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\.github",
+    "\\.github\\workflows",
     "\\src",
     "\\src\\openwrt_controller",
     "\\tests"
   ],
-  "SelectedNode": "\\tests\\test_version.py",
+  "SelectedNode": "\\.github\\workflows\\test.yml",
   "PreviewInSolutionExplorer": false
 }
