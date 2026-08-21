@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-openwrt-controller = "openwrt_pi-assistant.main:main"
+openwrt-controller = "openwrt_controller.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

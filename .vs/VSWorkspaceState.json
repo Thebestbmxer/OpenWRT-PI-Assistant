@@ -2,8 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\openwrt_pi-assistant"
+    "\\src\\openwrt_controller"
   ],
-  "SelectedNode": "\\src\\openwrt_pi-assistant\\main.py",
+  "SelectedNode": "\\src\\openwrt_controller\\main.py",
   "PreviewInSolutionExplorer": false
 }
