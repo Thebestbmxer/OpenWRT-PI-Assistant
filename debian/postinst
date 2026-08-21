@@ -11,6 +11,11 @@ if [ "$1" = "configure" ]; then
             --ingroup openwrt-controller \
             --home /var/lib/openwrt-pi-controller \
             --shell /usr/sbin/nologin \
+            --no-create-home \
+            openwrt-controller
+
+        usermod \
+            --home /var/lib/openwrt-pi-controller \
             openwrt-controller
     fi
 
