@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenWrt Pi Controller
+Documentation=OpenWrt Pi Controller application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+User=openwrt-controller
+Group=openwrt-controller
+
+ExecStart=/usr/bin/openwrt-controller
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
