@@ -7,7 +7,12 @@ from .config import Config
 def configure_logging(config=Config):
     """Configure application logging."""
 
-    log_directory = Path(config.get_data_dir()) / "logs"
+    if hasattr(config, "get_data_dir"):
+        data_dir = config.get_data_dir()
+    else:
+        data_dir = config.DATA_DIR
+
+    log_directory = Path(data_dir) / "logs"
     log_directory.mkdir(parents=True, exist_ok=True)
 
     log_file = log_directory / "controller.log"

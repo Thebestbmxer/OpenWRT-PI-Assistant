@@ -7,10 +7,14 @@ from .config import Config
 def initialize_database(config=Config):
     """Create the application database and initial schema."""
 
-    data_dir = Path(config.DATA_DIR)
-    data_dir.mkdir(parents=True, exist_ok=True)
+    if hasattr(config, "get_data_dir"):
+        data_dir = Path(config.get_data_dir())
+        database_path = Path(config.get_database_path())
+    else:
+        data_dir = Path(config.DATA_DIR)
+        database_path = Path(config.DATABASE_PATH)
 
-    database_path = Path(config.DATABASE_PATH)
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     connection = sqlite3.connect(database_path)
 
