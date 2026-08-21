@@ -1,8 +1,6 @@
 import sqlite3
 
-import os
 import pytest
-
 
 @pytest.fixture(autouse=True)
 def test_environment(tmp_path, monkeypatch):
@@ -11,10 +9,8 @@ def test_environment(tmp_path, monkeypatch):
         str(tmp_path / "openwrt-pi-controller-test"),
     )
 
-from openwrt_controller.app import create_app
-
-
 def test_create_app():
+    from openwrt_controller.app import create_app
     app = create_app()
 
     assert app is not None
@@ -23,7 +19,9 @@ def test_create_app():
 
 
 def test_index():
+    from openwrt_controller.app import create_app
     app = create_app()
+
     client = app.test_client()
 
     response = client.get("/")
@@ -32,6 +30,8 @@ def test_index():
     assert response.data == b"OpenWrt Pi Controller"
 
 def test_create_app_initializes_database(tmp_path):
+    from openwrt_controller.app import create_app
+
     class TestConfig:
         HOST = "127.0.0.1"
         PORT = 8080
@@ -62,6 +62,8 @@ def test_create_app_initializes_database(tmp_path):
     assert "events" in table_names
 
 def test_create_app_logs_startup(tmp_path):
+    from openwrt_controller.app import create_app
+
     class TestConfig:
         HOST = "127.0.0.1"
         PORT = 8080
