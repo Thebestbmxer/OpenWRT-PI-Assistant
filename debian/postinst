@@ -2,6 +2,19 @@
 set -e
 
 if [ "$1" = "configure" ]; then
+    if ! getent group openwrt-controller >/dev/null; then
+        addgroup --system openwrt-controller
+    fi
+
+    if ! getent passwd openwrt-controller >/dev/null; then
+        adduser --system \
+            --ingroup openwrt-controller \
+            --no-create-home \
+            --disabled-login \
+            openwrt-controller
+    fi
+
+    mkdir -p /var/lib/openwrt-pi-controller
     chown openwrt-controller:openwrt-controller /var/lib/openwrt-pi-controller
 fi
 

@@ -2,3 +2,7 @@
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_install:
+	dh_auto_install
+	dh_installdirs var/lib/openwrt-pi-controller
