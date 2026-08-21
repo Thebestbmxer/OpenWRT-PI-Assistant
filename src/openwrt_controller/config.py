@@ -10,6 +10,11 @@ class Config:
     APP_VERSION = "0.1.0"
     DEBUG = False
 
+    APPLICATION_USER = os.getenv(
+    "OPENWRT_CONTROLLER_USER",
+    "openwrt-controller",
+    )
+
     # Paths
     DATA_DIR = Path(
         os.getenv(

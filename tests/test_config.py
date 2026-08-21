@@ -4,6 +4,9 @@ from openwrt_controller.config import Config
 def test_default_application_name():
     assert Config.APP_NAME == "OpenWrt Pi Controller"
 
+def test_default_application_user():
+    assert Config.APPLICATION_USER == "openwrt-controller"
+
 
 def test_default_web_port():
     assert Config.PORT == 8080
