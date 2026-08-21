@@ -6,3 +6,9 @@
 override_dh_auto_install:
 	dh_auto_install
 	dh_installdirs var/lib/openwrt-pi-controller
+
+override_dh_installsystemd:
+	install -D -m 0644 \
+		packaging/systemd/openwrt-controller.service \
+		debian/openwrt-pi-controller/usr/lib/systemd/system/openwrt-controller.service
+	dh_installsystemd --name=openwrt-controller
