@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openwrt-pi-controller"
+version = "0.1.0"
+description = "Raspberry Pi controller for OpenWrt devices"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.0,<4.0",
+]
+
+[project.scripts]
+openwrt-controller = "openwrt_controller.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
