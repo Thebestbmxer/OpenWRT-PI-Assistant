@@ -1,3 +1,10 @@
+openwrt-pi-controller (0.3.4) unstable; urgency=medium
+
+  * Update project version.
+
+ -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Fri, 28 Aug 2026 10:34:35 +0000
+
+
 openwrt-pi-controller (0.3.0) unstable; urgency=medium
 
   * Initial Debian package for the OpenWrt Pi Controller.

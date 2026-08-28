@@ -1,0 +1,6 @@
+CHANGE INTO DIRECTORY!!!!!!
+cd ~/openwrt-pi-assistant
+
+git pull https://github.com/TheBestBMXer/openwrt-pi-assistant.git
+dpkg-buildpackage -us -uc -b
+sudo apt install ../openwrt-pi-controller_0.2.0-5_all.deb
