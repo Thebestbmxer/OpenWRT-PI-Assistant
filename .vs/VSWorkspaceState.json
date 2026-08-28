@@ -3,10 +3,12 @@
     "",
     "\\.github",
     "\\.github\\workflows",
+    "\\debian",
+    "\\packaging",
+    "\\packaging\\systemd",
     "\\src",
     "\\src\\openwrt_controller",
     "\\tests"
   ],
-  "SelectedNode": "\\tests\\test_app.py",
   "PreviewInSolutionExplorer": false
 }

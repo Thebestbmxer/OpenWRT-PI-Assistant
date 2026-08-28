@@ -1,0 +1,608 @@
+System Overview
+The project is a Raspberry Pi–assisted OpenWrt platform designed to extend the useful life of very resource-constrained routers such as the WNR1000v2.
+The design intentionally separates responsibilities:
+                    ┌──────────────────────────┐
+                    │      Raspberry Pi        │
+                    │                          │
+                    │  OpenWrt Secondary GUI   │
+                    │  Device Profile          │
+                    │  Configuration History   │
+                    │  Firmware Tracking       │
+                    │  DHCP / DNS              │
+                    │  Firewall / Routing      │
+                    │  VPN                     │
+                    │  Traffic Analysis        │
+                    └────────────┬─────────────┘
+                                 │
+                         Controller Port
+                         Physical WAN jack
+                                 │
+                    ┌────────────▼─────────────┐
+                    │       OpenWrt Router     │
+                    │                          │
+                    │  Ethernet switch         │
+                    │  VLAN                    │
+                    │  Wi-Fi AP/client         │
+                    │  SSH                     │
+                    │  Hardware/firmware ID    │
+                    │  LEDs                    │
+                    │  Diagnostics             │
+                    └──────────────────────────┘
+The router provides the hardware functions while the Pi provides the management, computation, storage, and higher-level networking functions.
+The controller software is intended to work with generic OpenWrt installations using supported OpenWrt interfaces. The WNR1000v2 is the eventual constrained target, rather than the definition of the Pi software.
+System Intent
+The project has four major goals.
+1. Extend legacy router hardware
+A 4 MB flash / 32 MB RAM router can continue serving as:
+managed Ethernet switch
+VLAN-aware network device
+managed wireless AP
+Wi-Fi client
+wireless-to-Ethernet adapter
+travel-network radio interface
+The Pi supplies the computational resources needed for modern networking.
+2. Preserve OpenWrt compatibility
+The Pi communicates through established OpenWrt mechanisms such as:
+SSH
+UCI
+ubus
+netifd
+standard Linux networking interfaces
+standard wireless interfaces
+supported OpenWrt utilities
+The project therefore acts as an OpenWrt secondary management layer rather than replacing OpenWrt.
+3. Provide a familiar interface
+The Pi hosts a locally accessible webpage with an OpenWrt/LuCI-inspired layout and terminology.
+The initial GUI is read-only and displays the actual state of the connected router.
+Status
+System
+Network
+Wireless
+Switch
+Diagnostics
+Logs
+This allows an experienced OpenWrt user to understand the interface immediately.
+4. Establish a foundation for constrained firmware
+Once the generic Pi controller has been validated against multiple OpenWrt devices, the project produces a purpose-built WNR1000v2 image containing only the functionality required by the controller and hardware.
+Router Responsibilities
+The eventual 4 MB router image is centered around:
+Ethernet
+├── managed switch
+├── VLAN support
+└── Controller Port
+
+Wireless
+├── Managed AP
+├── Wi-Fi client
+└── live Wi-Fi scanning
+
+Management
+├── SSH
+├── persistent host key
+├── Pi controller key
+└── OpenWrt configuration
+
+Identity
+├── immutable factory MAC
+├── configurable operational MAC
+├── hardware identity
+└── firmware identity
+
+Diagnostics
+├── LEDs
+├── switch-port state
+├── interface statistics
+├── Wi-Fi status
+├── boot information
+└── system health
+The Controller Port is always the physical WAN jack.
+Its logical function is determined by the deployment:
+Home/AP deployment
+    Controller Port → upstream/home Ethernet
+
+Travel deployment
+    Controller Port → Raspberry Pi
+The physical WAN jack therefore becomes a standardized high-speed connection point for the Pi while retaining the flexibility of an ordinary switch port in the logical network design.
+MAC Identity
+The router maintains two MAC identities:
+Factory MAC
+    │
+    └── immutable hardware identity
+
+Operational MAC
+    │
+    └── active network identity
+Normal home/AP operation uses:
+Operational MAC = Factory MAC
+Travel mode permits the Pi to configure the operational MAC.
+This allows future synthetic/randomized MAC functionality while maintaining predictable physical identities for ordinary home deployments.
+Ideal Minimal 4 MB Router Package Set
+The exact package list will ultimately be generated against the WNR1000v2's OpenWrt target because kernel modules and wireless drivers are hardware-specific.
+The conceptual base is:
+
+
+Function
+OpenWrt component
+Base system
+base-files
+Core utilities
+busybox
+Init/service management
+procd
+Configuration
+uci
+IPC/control
+ubus
+Network management
+netifd
+SSH
+dropbear
+Wireless framework
+mac80211
+Wireless driver
+WNR-specific driver
+AP operation
+hostapd / wpad-mini
+Wi-Fi scanning
+iw
+Ethernet/VLAN
+target-specific switch/DSA support
+LED control
+target-specific LED support
+Kernel modules
+target-specific minimum set
+The WNR image should be assembled with the OpenWrt ImageBuilder or equivalent supported image-generation process so dependencies are resolved by OpenWrt rather than manually maintained.
+The actual image target should be determined from the known-good WNR1000v2 22.03/22.04-era image and hardware identification.
+The guiding principle is:
+Every package earns its place by directly supporting router hardware, OpenWrt management, or the Pi-controller protocol.
+Minimal Raspberry Pi Software
+The first Pi installation can be considerably simpler.
+Base operating environment
+A lightweight Raspberry Pi Linux installation with:
+Python 3
+OpenSSH client
+SQLite
+IP networking utilities
+Application layer
+Flask
+SQLite
+OpenSSH
+Python standard library
+A minimal architecture can therefore be:
+Browser
+   │
+   ▼
+Flask Web Application
+   │
+   ▼
+OpenWrt Controller
+   │
+   ▼
+OpenSSH client
+   │
+   ▼
+OpenWrt router
+The Pi can use the system ssh client rather than requiring a Python SSH implementation during the initial phase. This keeps the controller dependency footprint small and uses a mature SSH implementation.
+SQLite provides local persistence for:
+Device Profile
+firmware identity
+configuration snapshots
+SSH host identity
+capability information
+device history
+A production deployment can later place a dedicated web server such as nginx in front of the application, but the initial controller can operate with a lightweight application server.
+Device Profile
+The Pi maintains one active Device Profile for the router it is managing.
+The profile contains:
+Device
+├── Manufacturer
+├── Model
+├── Hardware revision
+├── Architecture
+├── CPU
+├── RAM
+├── Flash
+│
+├── Factory MAC
+├── Operational MAC
+├── SSH host key
+│
+├── OpenWrt version
+├── OpenWrt target
+├── Kernel
+│
+├── Installed packages
+├── Detected capabilities
+│
+├── Interfaces
+├── Wireless
+├── Switch
+├── LEDs
+│
+└── Current state
+The Pi refreshes this information as the router changes.
+The profile becomes the foundation for generic OpenWrt compatibility.
+Milestone Roadmap
+Phase 0.0 — Development Foundation
+M0.0.1 Development Foundation	✅
+M0.0.2 Application Foundation	✅
+M0.0.3 Debian Package		✅
+
+  Build dependencies	✅
+  PEP 517		✅
+  Python wheel		✅
+  Debian .deb		✅
+  Executable		✅
+  Python modules	✅
+  Package metadata	✅
+  Install test		✅
+  Service account	✅
+  Persistent data	✅
+  Configuration		✅
+  systemd		✅
+  Upgrade test		✅
+  Uninstall test	✅
+                  │
+                  ▼
+M0.0.4 Release System
+        │
+        ├── Git tags
+        ├── GitHub Releases
+        └── automatic .deb
+                  │
+                  ▼
+M0.0.5 OpenWrt Communication
+        │
+        ├── SSH
+        ├── host key
+        ├── command execution
+        └── structured results
+M0.1 — Pi Operating Environment
+Establish:
+Raspberry Pi OS/Linux environment
+Python
+OpenSSH client
+SQLite
+networking
+Flask
+source-control structure
+application service
+Deliverable: Pi boots into a ready controller environment.
+M0.2 — Generic OpenWrt SSH Connection
+Connect the Pi to an existing known-good OpenWrt router.
+Implement:
+SSH connection
+host-key retrieval
+host-key storage
+connection timeout
+connection status
+command execution
+structured command results
+Deliverable: Pi can reliably communicate with an OpenWrt router.
+Phase 1 — Generic OpenWrt Discovery
+M1.1 — System Discovery
+Retrieve:
+OpenWrt release
+kernel
+target
+architecture
+CPU
+RAM
+flash/storage
+hostname
+uptime
+system information
+M1.2 — Network Discovery
+Retrieve:
+interfaces
+addresses
+routes
+link state
+interface statistics
+VLAN/device information
+M1.3 — Wireless Discovery
+Retrieve:
+radios
+bands
+channels
+SSIDs
+AP/client state
+associated stations
+supported capabilities
+M1.4 — Switch Discovery
+Retrieve:
+ports
+link state
+speed
+duplex
+VLAN information
+switch implementation
+Support both relevant OpenWrt switch architectures where possible, including swconfig and DSA.
+M1.5 — System/LED/Log Discovery
+Retrieve:
+LEDs
+boot information
+system log
+kernel log
+available services
+installed packages
+Phase 1 Deliverable:
+The Pi can interrogate a generic OpenWrt device and produce a complete Device Profile.
+Phase 2 — Read-Only GUI
+M2.1 — GUI Framework
+Create the OpenWrt-inspired navigation:
+Status
+System
+Network
+Wireless
+Switch
+Diagnostics
+Logs
+M2.2 — Status Page
+Display:
+device identity
+firmware
+uptime
+memory
+CPU
+network state
+Pi/controller connection
+M2.3 — System Page
+Display:
+OpenWrt version
+kernel
+architecture
+hardware
+installed packages
+boot information
+M2.4 — Network Page
+Display:
+interfaces
+IP addresses
+routes
+VLANs
+link state
+interface statistics
+M2.5 — Wireless Page
+Display:
+radio information
+current configuration
+channel
+association state
+connected clients
+M2.6 — Switch Page
+Display:
+physical ports
+link
+speed
+duplex
+VLAN membership
+M2.7 — Diagnostics
+Display:
+system health
+logs
+connectivity
+interface statistics
+Phase 2 Deliverable:
+A user can connect a computer to the network and browse to the Pi to view an OpenWrt-style, read-only representation of the connected router.
+Phase 3 — Live Diagnostics
+M3.1 — Fresh Wi-Fi Scanning
+Implement:
+GUI
+ ↓
+Pi
+ ↓
+SSH
+ ↓
+WNR
+ ↓
+live radio scan
+ ↓
+Pi
+ ↓
+GUI
+Each scan is performed on demand.
+M3.2 — Port Monitoring
+Display live:
+link
+speed
+duplex
+port state
+M3.3 — Interface Monitoring
+Collect:
+packets
+bytes
+errors
+link state
+M3.4 — Device Health
+Collect:
+uptime
+memory
+load
+temperature where available
+boot state
+Phase 3 Deliverable: a useful OpenWrt diagnostic console.
+Phase 4 — Device History
+M4.1 — Device Identity History
+Record:
+factory MAC
+operational MAC
+firmware
+hardware identity
+SSH identity
+M4.2 — Configuration Snapshots
+Read and store the router's configuration.
+Generate configuration revisions/hashes.
+M4.3 — Event History
+Record:
+boots
+firmware changes
+configuration changes
+MAC changes
+Wi-Fi events
+network events
+M4.4 — Device Replacement
+Support retiring one physical router and creating a new Device Profile while preserving historical records.
+Phase 4 Deliverable: the Pi becomes the router's persistent historical record.
+Phase 5 — Controlled Configuration
+This is where the GUI transitions from observation to management.
+M5.1 — Configuration Abstraction
+Create a controller API that represents:
+Network
+Wireless
+Switch
+VLAN
+LED
+System
+MAC
+independently of the underlying OpenWrt commands.
+M5.2 — Validation
+Allow the Pi to stage configuration and validate it before application.
+M5.3 — Transactional Changes
+Implement:
+Read
+ ↓
+Stage
+ ↓
+Validate
+ ↓
+Apply
+ ↓
+Verify
+ ↓
+Commit
+M5.4 — Automatic Rollback
+Recover automatically from configuration changes that interrupt controller connectivity.
+Phase 5 Deliverable: safe remote OpenWrt configuration management.
+Phase 6 — Pi Network Services
+Now the Pi begins taking responsibility for the services that make the legacy router a modern network platform.
+M6.1 — DHCP
+Pi becomes the DHCP authority.
+M6.2 — Pi-hole
+DNS filtering and local DHCP integration.
+M6.3 — Unbound
+Recursive DNS resolution.
+M6.4 — Routing/NAT
+Pi becomes the network gateway.
+M6.5 — Firewall
+Pi becomes the primary security boundary.
+Phase 6 Deliverable: the Pi becomes the network control plane.
+Phase 7 — Advanced Network Functions
+Add:
+WireGuard
+OpenVPN where appropriate
+traffic analysis
+historical bandwidth
+VLAN policy
+network segmentation
+client/device identification
+security monitoring
+Traffic processing remains on the Pi.
+The WNR provides the switching/radio hardware and lightweight statistics needed by the Pi.
+Phase 8 — 4 MB WNR Image Development
+This is where the dedicated WNR firmware work begins.
+The first step is not immediately stripping the image.
+M8.1 — Establish Known-Good Reference
+Document the existing functional WNR OpenWrt image:
+OpenWrt release
+target
+kernel
+packages
+configuration
+flash usage
+RAM usage
+wireless driver
+switch architecture
+LED implementation
+M8.2 — Hardware Profile
+Create the WNR1000v2 Device Profile:
+WNR1000v2
+    ↓
+hardware capabilities
+    ↓
+required OpenWrt components
+M8.3 — Minimal Image Definition
+Build the package manifest around:
+OpenWrt base
+SSH
+UCI
+ubus
+netifd
+Ethernet
+VLAN
+Wi-Fi
+Wi-Fi scanning
+LEDs
+identity
+diagnostics
+M8.4 — ImageBuilder Build
+Generate the first dedicated image using OpenWrt's supported image-generation tooling.
+M8.5 — Functional Test
+Validate:
+boot
+Ethernet
+Controller Port
+VLAN
+Wi-Fi AP
+Wi-Fi client
+Wi-Fi scanning
+SSH
+LEDs
+factory MAC
+operational MAC
+logs
+diagnostics
+Pi communication
+M8.6 — Resource Optimization
+Measure:
+Flash
+RAM
+CPU
+Boot time
+Wi-Fi performance
+Ethernet performance
+Then optimize the image while preserving the controller contract.
+Phase 8 Deliverable:
+A purpose-built WNR1000v2 OpenWrt image that provides the minimum hardware functionality required by the generic Pi controller.
+Final Architecture
+The resulting platform is:
+                         USER
+                           │
+                           ▼
+                    Web Browser
+                           │
+                           ▼
+              ┌───────────────────────┐
+              │    Raspberry Pi       │
+              │                       │
+              │ OpenWrt-style GUI     │
+              │ Device Profile        │
+              │ Configuration History │
+              │ Firmware Management   │
+              │ DHCP                  │
+              │ Pi-hole               │
+              │ Unbound               │
+              │ Firewall              │
+              │ Routing               │
+              │ VPN                   │
+              │ Traffic Analysis      │
+              └───────────┬───────────┘
+                          │
+                    Controller Port
+                    Physical WAN Jack
+                          │
+                          ▼
+              ┌───────────────────────┐
+              │      OpenWrt WNR      │
+              │                       │
+              │ Ethernet switch       │
+              │ VLAN                  │
+              │ Wi-Fi                 │
+              │ LEDs                  │
+              │ SSH                   │
+              │ Identity              │
+              │ Diagnostics           │
+              └───────────────────────┘
+The key development strategy is therefore:
+Generic OpenWrt first → read-only GUI → device profiles → diagnostics/history → controlled configuration → Pi network services → WNR-specific 4 MB image.
+This sequence lets the Pi software mature against a broad pool of existing OpenWrt hardware before the highly constrained WNR1000v2 image becomes the optimization target.
