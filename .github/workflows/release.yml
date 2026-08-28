@@ -1,0 +1,93 @@
+name: Build Debian Package
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-deb:
+    name: Build Debian package
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            devscripts \
+            dh-python \
+            python3-all \
+            python3-build \
+            python3-installer \
+            python3-setuptools
+
+      - name: Install Python test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            "flask>=3.0,<4.0"
+
+      - name: Run tests
+        run: |
+          python -m unittest discover -v
+
+      - name: Read project version
+        id: version
+        run: |
+          VERSION=$(python -c 'from openwrt_controller import __version__; print(__version__)')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Project version: $VERSION"
+
+      - name: Verify tag matches project version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PROJECT_VERSION="${{ steps.version.outputs.version }}"
+
+          echo "Tag version:     $TAG_VERSION"
+          echo "Project version: $PROJECT_VERSION"
+
+          if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
+            echo "ERROR: Git tag does not match project version."
+            exit 1
+          fi
+
+      - name: Update Debian changelog
+        run: |
+          python tools/update-version.py
+
+      - name: Build Debian package
+        run: |
+          dpkg-buildpackage -us -uc -b
+
+      - name: Verify Debian package
+        run: |
+          PACKAGE="../openwrt-pi-controller_${{ steps.version.outputs.version }}_all.deb"
+
+          if [ ! -f "$PACKAGE" ]; then
+            echo "ERROR: Expected package was not created:"
+            echo "$PACKAGE"
+            exit 1
+          fi
+
+          dpkg-deb -f "$PACKAGE" Package Version Architecture
+
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-pi-controller-${{ steps.version.outputs.version }}
+          path: ../openwrt-pi-controller_${{ steps.version.outputs.version }}_all.deb
+          if-no-files-found: error
