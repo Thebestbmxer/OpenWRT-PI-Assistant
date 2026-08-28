@@ -8,7 +8,7 @@ override_dh_auto_install:
 	dh_installdirs var/lib/openwrt-pi-controller
 
 override_dh_auto_test:
-	pytest -v
+	.venv/bin/pytest -v
 
 override_dh_installsystemd:
 	install -D -m 0644 \
