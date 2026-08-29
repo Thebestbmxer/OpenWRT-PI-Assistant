@@ -65,20 +65,24 @@ class RouterDiscovery:
         self.timeout = timeout
         self.networks = list(networks) if networks is not None else None
 
-    def discover(self) -> RouterCandidate:
-        """Return the first reachable router candidate."""
+def discover(self) -> RouterCandidate:
+    """Return the first reachable router candidate."""
 
-        for network in self._get_networks():
-            for address in self._addresses_in_network(network):
-                if self._port_is_open(address, self.ssh_port):
-                    return RouterCandidate(
-                        address=address,
-                        ssh_port=self.ssh_port,
-                    )
+    for network in self._get_networks():
+        for address in self._addresses_in_network(network):
+            if _is_local_address(address):
+                continue
 
-        raise RouterNotFoundError(
-            "No router candidate with an accessible SSH port was discovered."
-        )
+            if self._port_is_open(address, self.ssh_port):
+                return RouterCandidate(
+                    address=address,
+                    ssh_port=self.ssh_port,
+                )
+
+    raise RouterNotFoundError(
+        "No router candidate with an accessible SSH port was discovered."
+    )
+
 
     def _get_networks(self) -> list[str]:
         """Return networks that should be searched.
