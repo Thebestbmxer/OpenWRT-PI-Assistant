@@ -1,0 +1,473 @@
+OpenWrt Pi Controller — Development Handoff
+Project Overview
+
+Project: OpenWrt Pi Controller
+Repository: TheBestBMXer/openwrt-pi-assistant
+Package: openwrt-pi-controller
+Current Version: 0.3.5
+Target: v1.0.0
+
+OpenWrt Pi Controller is a Python-based application designed to provide a web interface for managing and monitoring an OpenWrt router from a Raspberry Pi.
+
+The project is currently in active development. Local Debian package builds on the Raspberry Pi are the current development workflow. GitHub release packaging will be finalized as the project approaches v1.0.0.
+
+Current Technology Stack
+Python 3
+Flask
+SQLite
+pytest
+Debian packaging
+debhelper
+dh-python
+pybuild
+systemd
+Git/GitHub
+Raspberry Pi running ARM64 Linux
+OpenWrt router as the managed network device
+
+The project uses a Python src/ layout.
+
+Current package:
+
+src/openwrt_controller/
+├── __init__.py
+├── app.py
+├── config.py
+├── database.py
+├── logging_config.py
+└── main.py
+
+Current Repository Structure
+
+Relevant project areas:
+
+openwrt-pi-assistant/
+├── .github/
+│   └── workflows/
+│       ├── test.yml
+│       └── release.yml
+│
+├── debian/
+│   ├── changelog
+│   ├── rules
+│   └── ...
+│
+├── packaging/
+│   └── systemd/
+│       └── openwrt-controller.service
+│
+├── src/
+│   └── openwrt_controller/
+│       ├── __init__.py
+│       ├── app.py
+│       ├── config.py
+│       ├── database.py
+│       ├── logging_config.py
+│       └── main.py
+│
+├── tests/
+│   ├── test_app.py
+│   ├── test_config.py
+│   ├── test_database.py
+│   ├── test_logging.py
+│   ├── test_package_metadata.py
+│   ├── test_systemd.py
+│   ├── test_upgrade.py
+│   └── test_version.py
+│
+├── tools/
+│   ├── check-release.py
+│   ├── check-version.py
+│   └── setup-dev.sh
+│
+└── pyproject.toml
+
+Current Version and Release Validation
+
+The application version is defined in:
+
+src/openwrt_controller/__init__.py
+
+
+Current version:
+
+0.3.5
+
+
+The Debian changelog begins with:
+
+openwrt-pi-controller (0.3.5) unstable; urgency=medium
+
+
+Version validation is provided by:
+
+tools/check-version.py
+
+
+Release consistency validation is provided by:
+
+tools/check-release.py
+
+
+The release validation checks:
+
+Python project version
+Debian changelog version
+Git tag/version consistency
+
+The expected release tag format is:
+
+vMAJOR.MINOR.PATCH
+
+
+For the current release:
+
+v0.3.5
+
+Current Test Status
+
+The project currently has 22 passing tests.
+
+Run the suite with:
+
+.venv/bin/pytest -v
+
+
+The test suite covers:
+
+Flask application creation
+Index route
+Database initialization
+Startup logging
+Configuration defaults
+Persistent database location
+Database initialization
+Logging configuration
+Debian package metadata
+systemd service configuration
+Upgrade data preservation
+Service-account preservation
+Version definition
+Version format
+Debian changelog/version consistency
+
+The current baseline is:
+
+22 passed
+
+
+New functionality should include corresponding automated tests.
+
+Current Debian Build
+
+The Debian package builds successfully on the Raspberry Pi with:
+
+dpkg-buildpackage -us -uc -b
+
+
+The resulting package is:
+
+openwrt-pi-controller_0.3.5_all.deb
+
+
+The package architecture is all, while the build environment is ARM64.
+
+The package integrates with systemd and installs:
+
+openwrt-controller.service
+
+
+Persistent application data is located under:
+
+/var/lib/openwrt-pi-controller
+
+
+The package includes installation/upgrade behavior for the application service account and persistent data.
+
+Development Workflow
+
+The current development workflow is:
+
+Development machine
+        │
+        ▼
+GitHub repository
+        │
+        ▼
+Raspberry Pi pulls changes
+        │
+        ▼
+Local tests
+        │
+        ▼
+Local Debian package build
+        │
+        ▼
+Install/test package on Raspberry Pi
+
+
+The Raspberry Pi is currently used as the local build and integration-test environment.
+
+GitHub Actions already contains automated testing and release-building infrastructure. The final GitHub .deb release workflow will be refined as the project approaches v1.0.0.
+
+GitHub Actions
+Test Workflow
+
+Located at:
+
+.github/workflows/test.yml
+
+
+It runs on:
+
+pushes to main
+pull requests
+
+The workflow:
+
+Checks out the repository.
+Installs Python.
+Installs the project.
+Installs pytest.
+Runs the test suite.
+Release Workflow
+
+Located at:
+
+.github/workflows/release.yml
+
+
+It is triggered by version tags matching:
+
+v*
+
+
+The workflow currently:
+
+Checks out the tagged source.
+Sets up Python.
+Installs Debian build dependencies.
+Installs Python test dependencies.
+Runs tests.
+Reads the project version.
+Verifies the Git tag matches the project version.
+Runs release validation.
+Builds the Debian package.
+Verifies the generated package.
+Uploads the package as a workflow artifact.
+Publishes the GitHub release.
+
+The GitHub release pipeline is considered supporting infrastructure for the eventual v1.0.0 release.
+
+Development Roadmap
+1. OpenWrt Connection Layer
+
+The next major development task is to implement a dedicated OpenWrt communication layer.
+
+Recommended structure:
+
+src/openwrt_controller/
+├── app.py
+├── config.py
+├── database.py
+├── logging_config.py
+├── main.py
+│
+└── openwrt/
+    ├── __init__.py
+    ├── client.py
+    ├── connection.py
+    └── system.py
+
+
+Responsibilities should be separated clearly.
+
+Connection Layer
+
+Responsible for:
+
+SSH connection management
+authentication
+command execution
+connection timeouts
+connection status
+SSH error handling
+host-key verification
+OpenWrt Client
+
+Responsible for:
+
+communicating with the router
+executing supported OpenWrt operations
+converting router responses into application-friendly data
+System Information
+
+Responsible for collecting information such as:
+
+hostname
+OpenWrt version
+kernel version
+uptime
+system load
+memory usage
+storage information
+network information
+
+The router communication layer should be independently testable through mocks so that most tests do not require a live router.
+
+2. Application Service Layer
+
+Keep Flask routes focused on HTTP/web concerns.
+
+Recommended architecture:
+
+Web UI
+   │
+   ▼
+Application/service layer
+   │
+   ▼
+OpenWrt client
+   │
+   ▼
+SSH connection
+   │
+   ▼
+OpenWrt router
+
+
+This separation will keep router operations independent from the web interface and make future functionality easier to test and extend.
+
+3. Dashboard
+
+Build a dashboard displaying useful router information.
+
+Initial dashboard functionality should include:
+
+router connection status
+hostname
+OpenWrt version
+uptime
+CPU/system load
+memory usage
+storage usage
+network/interface status
+
+The dashboard should provide clear visual status indicators and useful error information.
+
+4. Router Management
+
+Expand management functionality progressively.
+
+Potential areas include:
+
+services
+network interfaces
+DHCP
+firewall
+Wi-Fi
+system information
+router reboot operations
+
+Each feature should be implemented through the OpenWrt client layer rather than directly inside Flask routes.
+
+5. Configuration
+
+Provide configuration for:
+
+OpenWrt hostname/IP address
+SSH port
+SSH username
+authentication settings
+web application port
+persistent data directory
+application name
+
+Configuration should support sensible defaults and environment/config-file overrides where appropriate.
+
+6. Persistence
+
+Continue using the existing persistent data architecture.
+
+Persistent data should remain under:
+
+/var/lib/openwrt-pi-controller
+
+
+Future database changes should include migration support and tests covering upgrades.
+
+7. Security
+
+Security should be treated as a core v1 feature.
+
+Important areas include:
+
+web authentication
+secure credential handling
+CSRF protection
+SSH host-key verification
+least-privilege service execution
+secure filesystem permissions
+safe command execution
+input validation
+
+Router commands should never be constructed from unvalidated user input.
+
+8. Packaging
+
+Continue maintaining:
+
+Debian package support
+systemd integration
+persistent-data preservation
+service-account management
+upgrade compatibility
+
+Before v1.0.0, perform a clean installation and upgrade test on the Raspberry Pi using the generated .deb.
+
+Development Standards
+
+When adding functionality:
+
+Add the implementation.
+Add unit tests.
+Run the complete test suite.
+Build the Debian package locally.
+Test the installed package on the Raspberry Pi.
+Keep version/changelog consistency intact.
+Keep commits focused and descriptive.
+Preserve the existing persistent-data and systemd architecture.
+
+The current baseline should remain:
+
+22 tests passing
+Debian package builds successfully
+Version consistency passes
+
+
+New features should increase test coverage rather than bypass existing validation.
+
+Immediate Next Task
+
+Begin implementation of the OpenWrt connection/client layer.
+
+Start with a clean, testable abstraction for SSH communication. Build the connection layer with mocked tests first, then add integration testing against the actual OpenWrt router.
+
+The first implementation should establish:
+
+OpenWrtConnection
+        │
+        ├── connect()
+        ├── disconnect()
+        ├── execute()
+        └── connection/error handling
+
+
+Then build:
+
+OpenWrtClient
+        │
+        └── system information operations
+
+
+Once that foundation is working, connect it to the Flask application and begin building the dashboard.
