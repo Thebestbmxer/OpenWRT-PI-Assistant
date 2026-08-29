@@ -39,7 +39,7 @@ def test_installs_public_key(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -50,7 +50,7 @@ def test_install_command_creates_ssh_directory_and_authorized_keys(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -64,7 +64,7 @@ def test_install_command_contains_public_key(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -77,7 +77,7 @@ def test_install_is_idempotent(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
     installer.install(key_pair)
@@ -89,7 +89,7 @@ def test_install_preserves_existing_authorized_keys(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -103,7 +103,7 @@ def test_install_sets_ssh_directory_permissions(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -116,7 +116,7 @@ def test_install_sets_authorized_keys_permissions(
     client: MagicMock,
     key_pair: SSHKeyPair,
 ):
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     installer.install(key_pair)
 
@@ -131,7 +131,7 @@ def test_install_requires_authenticated_client(
     client = MagicMock(spec=paramiko.SSHClient)
     client.get_transport.return_value = None
 
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     with pytest.raises(RuntimeError, match="SSH connection is not active"):
         installer.install(key_pair)
@@ -148,7 +148,7 @@ def test_install_wraps_ssh_errors(
         "remote command failed"
     )
 
-    installer = SSHKeyInstaller(client)
+    installer = RouterKeyInstaller(client)
 
     with pytest.raises(paramiko.SSHException):
         installer.install(key_pair)
