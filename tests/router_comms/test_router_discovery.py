@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 
 from openwrt_controller.router_comms.discovery.router_discovery import (
-    RouterCandidate,
     RouterDiscovery,
 )
 from openwrt_controller.router_comms.exceptions import RouterNotFoundError

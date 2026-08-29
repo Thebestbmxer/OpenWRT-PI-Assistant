@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import ipaddress
-
 import socket
+from dataclasses import dataclass
 from typing import Iterable
 
-from openwrt_controller.router_comms.exceptions import (
-    RouterNotFoundError,
-)
+from openwrt_controller.router_comms.exceptions import RouterNotFoundError
+
 
 def _local_ipv4_addresses() -> set[str]:
     """Return IPv4 addresses assigned to this machine."""
@@ -26,20 +24,27 @@ def _local_ipv4_addresses() -> set[str]:
 
     return addresses
 
+
 def _is_local_address(address: str) -> bool:
-    """Return True when an address belongs to this machine."""
+    """Return True when an address belongs to this machine.
+
+    Loopback addresses are always considered local. IPv4 addresses
+    assigned to the controller are also considered local so discovery
+    cannot select the controller itself as a router.
+    """
     try:
-        parsed = ip_address(address)
+        ip_address = ipaddress.ip_address(address)
     except ValueError:
         return False
 
-    if parsed.is_loopback:
+    if ip_address.is_loopback:
         return True
 
-    if parsed.version == 4 and address in _local_ipv4_addresses():
-        return True
+    if ip_address.version == 4:
+        return address in _local_ipv4_addresses()
 
     return False
+
 
 @dataclass(frozen=True)
 class RouterCandidate:
@@ -47,6 +52,7 @@ class RouterCandidate:
 
     address: str
     ssh_port: int = 22
+
 
 class RouterDiscovery:
     """Discover reachable router candidates.
@@ -65,31 +71,30 @@ class RouterDiscovery:
         self.timeout = timeout
         self.networks = list(networks) if networks is not None else None
 
-def discover(self) -> RouterCandidate:
-    """Return the first reachable router candidate."""
+    def discover(self) -> RouterCandidate:
+        """Return the first reachable router candidate."""
 
-    for network in self._get_networks():
-        for address in self._addresses_in_network(network):
-            if _is_local_address(address):
-                continue
+        for network in self._get_networks():
+            for address in self._addresses_in_network(network):
+                # Never attempt to connect to the controller itself.
+                if _is_local_address(address):
+                    continue
 
-            if self._port_is_open(address, self.ssh_port):
-                return RouterCandidate(
-                    address=address,
-                    ssh_port=self.ssh_port,
-                )
+                if self._port_is_open(address, self.ssh_port):
+                    return RouterCandidate(
+                        address=address,
+                        ssh_port=self.ssh_port,
+                    )
 
-    raise RouterNotFoundError(
-        "No router candidate with an accessible SSH port was discovered."
-    )
-
+        raise RouterNotFoundError(
+            "No router candidate with an accessible SSH port was discovered."
+        )
 
     def _get_networks(self) -> list[str]:
         """Return networks that should be searched.
 
-        Explicitly supplied networks are used when provided. Automatic
-        interface discovery is added separately so that it can be
-        independently tested.
+        Explicitly supplied networks are used when provided. Otherwise,
+        networks are derived from the controller's local IPv4 addresses.
         """
         if self.networks:
             return self.networks
@@ -99,9 +104,8 @@ def discover(self) -> RouterCandidate:
     def _get_local_networks(self) -> list[str]:
         """Determine local IPv4 networks.
 
-        The initial implementation uses the hostname-resolved local
-        addresses. This intentionally remains conservative until a
-        platform-specific interface discovery implementation is added.
+        The initial implementation uses hostname-resolved local
+        addresses. Each address is assumed to belong to a /24 network.
         """
         networks: list[str] = []
 
