@@ -7,7 +7,7 @@ class Config:
 
     # Application
     APP_NAME = "OpenWrt Pi Controller"
-    APP_VERSION = "0.1.0"
+    APP_VERSION = __version__ #"0.1.0"
     DEBUG = False
 
     APPLICATION_USER = os.getenv(
@@ -28,6 +28,18 @@ class Config:
     @classmethod
     def get_database_path(cls):
         return cls.get_data_dir() / "controller.db"
+    
+    @classmethod
+    def get_ssh_key_directory(cls):
+        return cls.get_data_dir() / ".ssh"
+    
+    @classmethod
+    def get_ssh_private_key_path(cls):
+        return cls.get_ssh_key_directory() / "controller"
+
+    @classmethod
+    def get_ssh_public_key_path(cls):
+        return cls.get_ssh_key_directory() / "controller.pub"
 
     # Web application
     HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "0.0.0.0")
