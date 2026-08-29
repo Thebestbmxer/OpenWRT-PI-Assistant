@@ -12,15 +12,31 @@ from openwrt_controller.router_comms.exceptions import RouterNotFoundError
 
 def _local_ipv4_addresses() -> set[str]:
     """Return IPv4 addresses assigned to this machine."""
+    import subprocess
+
     addresses = {"127.0.0.1"}
 
-    hostname = socket.gethostname()
-
     try:
-        _, _, host_addresses = socket.gethostbyname_ex(hostname)
-        addresses.update(host_addresses)
-    except socket.gaierror:
-        pass
+        result = subprocess.run(
+            ["ip", "-4", "-o", "addr", "show"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return addresses
+
+    for line in result.stdout.splitlines():
+        parts = line.split()
+
+        try:
+            address_with_prefix = parts[3]
+            interface = ipaddress.ip_interface(address_with_prefix)
+
+            if interface.version == 4:
+                addresses.add(str(interface.ip))
+        except (IndexError, ValueError):
+            continue
 
     return addresses
 
@@ -102,24 +118,32 @@ class RouterDiscovery:
         return self._get_local_networks()
 
     def _get_local_networks(self) -> list[str]:
-        """Determine local IPv4 networks.
+        """Determine local IPv4 networks from active interfaces.
 
-        The initial implementation uses hostname-resolved local
-        addresses. Each address is assumed to belong to a /24 network.
+        Uses the Linux ``ip`` command rather than hostname resolution so
+        discovery reflects the networks actually assigned to the controller.
         """
+        import subprocess
+
         networks: list[str] = []
 
-        hostname = socket.gethostname()
-
         try:
-            addresses = socket.gethostbyname_ex(hostname)[2]
-        except socket.gaierror:
-            addresses = []
+            result = subprocess.run(
+                ["ip", "-4", "-o", "addr", "show", "scope", "global"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except (OSError, subprocess.CalledProcessError):
+            return networks
 
-        for address in addresses:
+        for line in result.stdout.splitlines():
+            parts = line.split()
+
             try:
-                interface = ipaddress.ip_interface(f"{address}/24")
-            except ValueError:
+                address_with_prefix = parts[3]
+                interface = ipaddress.ip_interface(address_with_prefix)
+            except (IndexError, ValueError):
                 continue
 
             network = str(interface.network)
@@ -128,6 +152,7 @@ class RouterDiscovery:
                 networks.append(network)
 
         return networks
+
 
     @staticmethod
     def _addresses_in_network(network: str) -> Iterable[str]:
