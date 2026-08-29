@@ -7,7 +7,7 @@ import paramiko
 import pytest
 
 from openwrt_controller.router_comms.ssh.key_installer import (
-    SSHKeyInstaller,
+    RouterKeyInstaller,
 )
 from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
 
