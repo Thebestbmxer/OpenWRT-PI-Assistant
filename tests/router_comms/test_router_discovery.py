@@ -27,6 +27,25 @@ def test_discovery_returns_reachable_candidate():
     assert candidate.address == "192.168.50.1"
     assert candidate.ssh_port == 22
 
+def test_discovery_ignores_loopback_addresses():
+    addresses = [
+        "127.0.0.1",
+        "127.0.1.1",
+        "127.255.255.254",
+        "192.168.50.1",
+    ]
+
+    discovered = [
+        address
+        for address in addresses
+        if not router_discovery._is_local_address(address)
+    ]
+
+    assert "127.0.0.1" not in discovered
+    assert "127.0.1.1" not in discovered
+    assert "127.255.255.254" not in discovered
+    assert "192.168.50.1" in discovered
+
 
 def test_discovery_tries_addresses_in_network():
     discovery = RouterDiscovery(

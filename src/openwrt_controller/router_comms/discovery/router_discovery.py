@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import ipaddress
+
 import socket
 from typing import Iterable
 
@@ -11,6 +12,34 @@ from openwrt_controller.router_comms.exceptions import (
     RouterNotFoundError,
 )
 
+def _local_ipv4_addresses() -> set[str]:
+    """Return IPv4 addresses assigned to this machine."""
+    addresses = {"127.0.0.1"}
+
+    hostname = socket.gethostname()
+
+    try:
+        _, _, host_addresses = socket.gethostbyname_ex(hostname)
+        addresses.update(host_addresses)
+    except socket.gaierror:
+        pass
+
+    return addresses
+
+def _is_local_address(address: str) -> bool:
+    """Return True when an address belongs to this machine."""
+    try:
+        parsed = ip_address(address)
+    except ValueError:
+        return False
+
+    if parsed.is_loopback:
+        return True
+
+    if parsed.version == 4 and address in _local_ipv4_addresses():
+        return True
+
+    return False
 
 @dataclass(frozen=True)
 class RouterCandidate:
@@ -18,7 +47,6 @@ class RouterCandidate:
 
     address: str
     ssh_port: int = 22
-
 
 class RouterDiscovery:
     """Discover reachable router candidates.

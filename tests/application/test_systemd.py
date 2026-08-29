@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 SERVICE_FILE = (
-    Path(__file__).parents[1]
+    Path(__file__).parents[2]
     / "packaging"
     / "systemd"
     / "openwrt-controller.service"
