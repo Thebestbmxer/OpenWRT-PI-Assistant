@@ -1,50 +1,50 @@
 """Install the controller's SSH public key on an OpenWrt router."""
 
-from shlex import quote
+from future import annotations
 
 import paramiko
 
-from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
-
+from .keys import SSHKeyPair
 
 class RouterKeyInstaller:
-    """Install a controller public key into OpenWrt authorized_keys."""
+"""Install a controller public key into OpenWrt authorized_keys."""
 
-    AUTHORIZED_KEYS_PATH = "/root/.ssh/authorized_keys"
-    SSH_DIRECTORY = "/root/.ssh"
+AUTHORIZED_KEYS_PATH = "/root/.ssh/authorized_keys"
+SSH_DIRECTORY = "/root/.ssh"
 
-    def install(
-        self,
-        client: paramiko.SSHClient,
-        key_pair: SSHKeyPair,
-    ) -> None:
-        """Install a controller public key on the router.
+def __init__(self, client: paramiko.SSHClient) -> None:
+    self.client = client
 
-        The operation is idempotent. If the key is already present,
-        it is not added a second time.
+def install(self, key_pair: SSHKeyPair) -> None:
+    """Install the controller public key on the router.
 
-        Existing authorized keys are preserved.
-        """
+    The operation is idempotent. Existing authorized keys are
+    preserved and the controller key is only added if it is not
+    already present.
+    """
 
-        public_key = key_pair.public_key.strip()
+    transport = self.client.get_transport()
 
-        if not public_key:
-            raise ValueError("SSH public key cannot be empty.")
+    if transport is None or not transport.is_active():
+        raise RuntimeError("SSH connection is not active")
 
-        quoted_public_key = quote(public_key)
+    public_key = key_pair.public_key.strip()
 
-        command = (
-            f"mkdir -p {self.SSH_DIRECTORY} && "
-            f"chmod 700 {self.SSH_DIRECTORY} && "
-            f"touch {self.AUTHORIZED_KEYS_PATH} && "
-            f"chmod 600 {self.AUTHORIZED_KEYS_PATH} && "
-            f"grep -Fqx {quoted_public_key} "
-            f"{self.AUTHORIZED_KEYS_PATH} || "
-            f"printf '%s\\n' {quoted_public_key} "
-            f">> {self.AUTHORIZED_KEYS_PATH}"
-        )
+    if not public_key:
+        raise ValueError("SSH public key cannot be empty.")
 
-        stdin, stdout, stderr = client.exec_command(command)
+    command = (
+        f"mkdir -p {self.SSH_DIRECTORY} && "
+        f"chmod 700 {self.SSH_DIRECTORY} && "
+        f"touch {self.AUTHORIZED_KEYS_PATH} && "
+        f"chmod 600 {self.AUTHORIZED_KEYS_PATH} && "
+        f"grep -Fqx '{public_key}' "
+        f"{self.AUTHORIZED_KEYS_PATH} || "
+        f"echo '{public_key}' >> {self.AUTHORIZED_KEYS_PATH}"
+    )
+
+    try:
+        stdin, stdout, stderr = self.client.exec_command(command)
 
         try:
             exit_status = stdout.channel.recv_exit_status()
@@ -56,11 +56,13 @@ class RouterKeyInstaller:
 
             if exit_status != 0:
                 raise RuntimeError(
-                    f"Failed to install SSH public key: "
-                    f"{error.strip()}"
+                    f"Failed to install SSH public key: {error.strip()}"
                 )
 
         finally:
             stdin.close()
             stdout.close()
             stderr.close()
+
+    except paramiko.SSHException:
+        raise
