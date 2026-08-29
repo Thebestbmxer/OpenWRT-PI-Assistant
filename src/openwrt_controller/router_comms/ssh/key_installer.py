@@ -1,6 +1,11 @@
 """Install the controller's SSH public key on an OpenWrt router."""
 
+from shlex import quote
+
 import paramiko
+
+from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
+
 
 class RouterKeyInstaller:
     """Install a controller public key into OpenWrt authorized_keys."""
@@ -11,9 +16,9 @@ class RouterKeyInstaller:
     def install(
         self,
         client: paramiko.SSHClient,
-        public_key: str,
+        key_pair: SSHKeyPair,
     ) -> None:
-        """Install a public key on the router.
+        """Install a controller public key on the router.
 
         The operation is idempotent. If the key is already present,
         it is not added a second time.
@@ -21,19 +26,22 @@ class RouterKeyInstaller:
         Existing authorized keys are preserved.
         """
 
-        public_key = public_key.strip()
+        public_key = key_pair.public_key.strip()
 
         if not public_key:
             raise ValueError("SSH public key cannot be empty.")
+
+        quoted_public_key = quote(public_key)
 
         command = (
             f"mkdir -p {self.SSH_DIRECTORY} && "
             f"chmod 700 {self.SSH_DIRECTORY} && "
             f"touch {self.AUTHORIZED_KEYS_PATH} && "
             f"chmod 600 {self.AUTHORIZED_KEYS_PATH} && "
-            f"grep -Fqx '{public_key}' "
+            f"grep -Fqx {quoted_public_key} "
             f"{self.AUTHORIZED_KEYS_PATH} || "
-            f"echo '{public_key}' >> {self.AUTHORIZED_KEYS_PATH}"
+            f"printf '%s\\n' {quoted_public_key} "
+            f">> {self.AUTHORIZED_KEYS_PATH}"
         )
 
         stdin, stdout, stderr = client.exec_command(command)
@@ -41,11 +49,15 @@ class RouterKeyInstaller:
         try:
             exit_status = stdout.channel.recv_exit_status()
 
-            error = stderr.read().decode("utf-8", errors="replace")
+            error = stderr.read().decode(
+                "utf-8",
+                errors="replace",
+            )
 
             if exit_status != 0:
                 raise RuntimeError(
-                    f"Failed to install SSH public key: {error.strip()}"
+                    f"Failed to install SSH public key: "
+                    f"{error.strip()}"
                 )
 
         finally:
