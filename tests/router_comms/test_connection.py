@@ -42,7 +42,7 @@ def test_connect_uses_controller_private_key(
     client = MagicMock()
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
