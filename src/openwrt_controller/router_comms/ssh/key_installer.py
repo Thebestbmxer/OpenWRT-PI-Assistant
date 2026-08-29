@@ -1,7 +1,5 @@
 """Install the controller's SSH public key on an OpenWrt router."""
 
-from future import annotations
-
 import paramiko
 
 from .keys import SSHKeyPair
