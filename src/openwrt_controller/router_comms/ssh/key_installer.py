@@ -7,8 +7,8 @@ from .keys import SSHKeyPair
 class RouterKeyInstaller:
     """Install a controller public key into OpenWrt authorized_keys."""
 
-    AUTHORIZED_KEYS_PATH = "/root/.ssh/authorized_keys"
-    SSH_DIRECTORY = "/root/.ssh"
+    AUTHORIZED_KEYS_PATH = "~/.ssh/authorized_keys"
+    SSH_DIRECTORY = "~/.ssh"
 
     def __init__(self, client: paramiko.SSHClient) -> None:
         self.client = client
