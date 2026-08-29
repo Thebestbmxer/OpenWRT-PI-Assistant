@@ -67,7 +67,7 @@ jobs:
 
       - name: Update Debian changelog
         run: |
-          python tools/update-version.py
+          python tools/check-release.py "$GITHUB_REF_NAME"
 
       - name: Build Debian package
         run: |
