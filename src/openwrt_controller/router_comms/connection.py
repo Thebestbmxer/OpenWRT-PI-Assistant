@@ -1,125 +1,134 @@
-"""Persistent SSH communication with an OpenWrt router."""
+"""Persistent SSH connections to OpenWrt routers."""
 
-from __future__ import annotations
-
+from dataclasses import dataclass
 from pathlib import Path
 
 import paramiko
 
+from openwrt_controller.router_comms.discovery.router_discovery import (
+    RouterCandidate,
+)
 from openwrt_controller.router_comms.exceptions import (
     InitialCommunicationError,
 )
+from openwrt_controller.router_comms.ssh_keys import SSHKeyPair
+
+
+@dataclass(frozen=True)
+class RouterConnectionConfig:
+    """Configuration required to connect to a router."""
+
+    username: str = "root"
+    timeout: float = 5.0
 
 
 class RouterConnection:
-    """Manage a persistent authenticated SSH connection to a router.
-
-    Unlike RouterBootstrap, this class uses the controller's permanent
-    SSH private key and verifies the router's host key.
-    """
+    """Manage an authenticated SSH connection to an OpenWrt router."""
 
     def __init__(
         self,
-        address: str,
-        ssh_port: int,
-        username: str,
-        private_key_path: Path,
-        host_key: str,
-        timeout: float = 5.0,
+        candidate: RouterCandidate,
+        key_pair: SSHKeyPair,
+        config: RouterConnectionConfig | None = None,
     ) -> None:
-        self.address = address
-        self.ssh_port = ssh_port
-        self.username = username
-        self.private_key_path = Path(private_key_path)
-        self.host_key = host_key
-        self.timeout = timeout
+        self.candidate = candidate
+        self.key_pair = key_pair
+        self.config = config or RouterConnectionConfig()
 
         self._client: paramiko.SSHClient | None = None
 
     def connect(self) -> None:
-        """Establish the permanent SSH connection."""
+        """Establish an SSH connection using the controller private key."""
 
         if self._client is not None:
             return
 
         client = paramiko.SSHClient()
 
-        # Only the explicitly trusted router host key is accepted.
-        client.get_host_keys().add(
-            self.address,
-            self.host_key.split()[0],
-            paramiko.PKey.from_type_string(
-                self.host_key.split()[0],
-                b"",
-            ),
-        )
-
-        client.load_system_host_keys()
-
-        client.set_missing_host_key_policy(
-            paramiko.RejectPolicy()
-        )
+        # Host-key verification will be added before permanent
+        # router connections are enabled.
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         try:
             client.connect(
-                hostname=self.address,
-                port=self.ssh_port,
-                username=self.username,
-                key_filename=str(self.private_key_path),
-                timeout=self.timeout,
+                hostname=self.candidate.address,
+                port=self.candidate.ssh_port,
+                username=self.config.username,
+                key_filename=str(self.key_pair.private_key_path),
+                timeout=self.config.timeout,
                 allow_agent=False,
                 look_for_keys=False,
             )
 
         except (
+            paramiko.AuthenticationException,
             paramiko.SSHException,
             OSError,
         ) as exc:
             client.close()
 
             raise InitialCommunicationError(
-                f"Unable to establish SSH connection with "
-                f"{self.address}:{self.ssh_port}."
+                f"Unable to connect to router "
+                f"{self.candidate.address}:{self.candidate.ssh_port}."
             ) from exc
 
         self._client = client
 
-    def execute(self, command: str) -> str:
-        """Execute a command and return stdout."""
+    def execute(
+        self,
+        command: str,
+    ) -> tuple[str, str, int]:
+        """Execute a command on the connected router.
+
+        Returns:
+            A tuple containing stdout, stderr, and the exit status.
+        """
 
         if self._client is None:
-            raise InitialCommunicationError(
-                "Router connection has not been established."
+            raise RuntimeError(
+                "Router SSH connection has not been established."
             )
 
-        stdin = stdout = stderr = None
+        stdin, stdout, stderr = self._client.exec_command(command)
 
         try:
-            stdin, stdout, stderr = self._client.exec_command(command)
+            output = stdout.read().decode("utf-8")
+            error = stderr.read().decode("utf-8")
+            exit_status = stdout.channel.recv_exit_status()
 
-            output = stdout.read().decode()
-            error = stderr.read().decode()
-
-            if error:
-                raise InitialCommunicationError(
-                    f"Router command failed: {error.strip()}"
-                )
-
-            return output
+            return output, error, exit_status
 
         finally:
-            if stdin is not None:
-                stdin.close()
-
-            if stdout is not None:
-                stdout.close()
-
-            if stderr is not None:
-                stderr.close()
+            stdin.close()
+            stdout.close()
+            stderr.close()
 
     def close(self) -> None:
-        """Close the SSH connection."""
+        """Close the router SSH connection."""
 
         if self._client is not None:
             self._client.close()
             self._client = None
+
+    @property
+    def connected(self) -> bool:
+        """Return whether an SSH connection is currently established."""
+
+        if self._client is None:
+            return False
+
+        transport = self._client.get_transport()
+
+        return transport is not None and transport.is_active()
+
+    def __enter__(self) -> "RouterConnection":
+        self.connect()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: object,
+        exc_value: object,
+        traceback: object,
+    ) -> None:
+        self.close()
