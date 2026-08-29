@@ -1,130 +1,103 @@
-OpenWrt Pi Controller — System Overview & Roadmap
-System Overview
-
-The project is a Raspberry Pi–assisted OpenWrt platform designed to extend the useful life of resource-constrained routers such as the Netgear WNR1000v2.
-
-The architecture intentionally separates responsibilities:
-
-                    ┌──────────────────────────┐
-                    │      Raspberry Pi        │
-                    │                          │
-                    │  OpenWrt Secondary GUI   │
-                    │  Device Profile          │
-                    │  Configuration History   │
-                    │  Firmware Tracking       │
-                    │  DHCP / DNS              │
-                    │  Firewall / Routing      │
-                    │  VPN                     │
-                    │  Traffic Analysis        │
-                    └────────────┬─────────────┘
-                                 │
-                         Controller Port
-                         Physical WAN jack
-                                 │
-                    ┌────────────▼─────────────┐
-                    │       OpenWrt Router     │
-                    │                          │
-                    │  Ethernet switch         │
-                    │  VLAN                    │
-                    │  Wi-Fi AP/client         │
-                    │  SSH                     │
-                    │  Hardware/firmware ID    │
-                    │  LEDs                    │
-                    │  Diagnostics             │
-                    └──────────────────────────┘
-
-
 The router provides the hardware functions while the Pi provides management, computation, storage, and higher-level networking functions.
 
 The controller is designed around generic OpenWrt compatibility. The WNR1000v2 is the eventual constrained hardware target, not the definition of the Pi software.
-
 System Intent
 
 The project has four major goals.
-
 1. Extend legacy router hardware
 
 A 4 MB flash / 32 MB RAM router can continue serving as:
 
-managed Ethernet switch
-VLAN-aware network device
-managed wireless AP
-Wi-Fi client
-wireless-to-Ethernet adapter
-travel-network radio interface
+    managed Ethernet switch
+    VLAN-aware network device
+    managed wireless AP
+    Wi-Fi client
+    wireless-to-Ethernet adapter
+    travel-network radio interface
 
 The Pi supplies the computational resources required for modern networking services.
-
 2. Preserve OpenWrt compatibility
 
 The Pi communicates through established OpenWrt mechanisms:
 
-SSH
-UCI
-ubus
-netifd
-standard Linux networking interfaces
-standard wireless interfaces
-supported OpenWrt utilities
+    SSH
+    UCI
+    ubus
+    netifd
+    standard Linux networking interfaces
+    standard wireless interfaces
+    supported OpenWrt utilities
 
-The Pi therefore acts as an OpenWrt secondary management layer, rather than replacing OpenWrt.
-
+The Pi therefore acts as an OpenWrt secondary management layer rather than replacing OpenWrt.
 3. Provide a familiar interface
 
 The Pi hosts a locally accessible web interface using an OpenWrt/LuCI-inspired layout:
 
-Status
-System
-Network
-Wireless
-Switch
-Diagnostics
-Logs
-
+    Status
+    System
+    Network
+    Wireless
+    Switch
+    Diagnostics
+    Logs
 
 The initial interface is read-only and displays the actual state of the connected router.
-
 4. Establish a foundation for constrained firmware
 
 After the generic controller has been validated against multiple OpenWrt devices, the project will produce a purpose-built WNR1000v2 image containing only the functionality required by the controller and hardware.
-
 Current Development Status
-Phase 0 — Development Foundation
 Milestone	Status
 M0.0.1 Development Foundation	✅ Complete
 M0.0.2 Application Foundation	✅ Complete
 M0.0.3 Debian Package	✅ Complete
-M0.0.4 Release System	⏭️ Next
-M0.0.5 OpenWrt Communication	⏭️ After release packaging
+M0.0.4 Release System	🚧 Current
+M0.0.5 OpenWrt Communication	⏭️ Next
+M0.1 Pi Operating Environment	⏭️ Planned
+M0.2 Generic OpenWrt SSH	⏭️ Planned
+M1 Generic OpenWrt Discovery	⏭️ Planned
+M2 Read-Only GUI	⏭️ Planned
+M3 Live Diagnostics	⏭️ Planned
+M4 Device History	⏭️ Planned
+M5 Controlled Configuration	⏭️ Planned
+M6 Pi Network Services	⏭️ Planned
+M7 Advanced Network Functions	⏭️ Planned
+M8 WNR1000v2 4 MB Firmware	⏭️ Planned
 M0.0.3 — Debian Package
+Status: ✅ Complete
 
-The Debian packaging milestone is now functionally complete.
+The Debian packaging milestone is functionally complete and has now been validated end-to-end.
 
 Completed:
 
-✅ Build dependencies
-✅ PEP 517 packaging
-✅ Python wheel
-✅ Debian .deb
-✅ Executable installation
-✅ Python modules
-✅ Package metadata
-✅ Installation testing
-✅ Dedicated openwrt-controller system user
-✅ Dedicated openwrt-controller group
-✅ Persistent /var/lib/openwrt-pi-controller directory
-✅ State-directory ownership
-✅ systemd service packaging
-✅ dh_installsystemd
-✅ Service enablement
-✅ Service startup
-✅ Service restart
-✅ Package upgrade testing
-✅ Installed service verification
-✅ Remote HTTP connectivity testing
-✅ HTTP 200 OK from the controller
+    ✅ Debian package build dependencies
+    ✅ PEP 517 / pyproject.toml packaging
+    ✅ Setuptools build backend
+    ✅ Python wheel generation
+    ✅ Debian .deb generation
+    ✅ Python package installation
+    ✅ Executable installation
+    ✅ Package metadata
+    ✅ Installation testing
+    ✅ Dedicated openwrt-controller service user
+    ✅ Dedicated openwrt-controller group
+    ✅ Persistent /var/lib/openwrt-pi-controller directory
+    ✅ State-directory ownership
+    ✅ systemd service packaging
+    ✅ dh_installsystemd
+    ✅ Service enablement
+    ✅ Service startup
+    ✅ Service restart
+    ✅ Package upgrade testing
+    ✅ Installed service verification
+    ✅ Remote HTTP connectivity testing
+    ✅ HTTP 200 response from the controller
+    ✅ Automated pytest execution during Debian package builds
+    ✅ Python package version validation
+    ✅ Debian changelog/version consistency validation
+    ✅ Build artifacts excluded from Git
+    ✅ Debian build no longer intentionally rewrites tracked source files
 
-The resulting installation path is now:
+The resulting installation path is:
 
 .deb
  │
@@ -133,7 +106,6 @@ The resulting installation path is now:
  ├── /usr/lib/systemd/system/openwrt-controller.service
  └── /var/lib/openwrt-pi-controller/
 
-
 The installed service is operational:
 
 openwrt-controller.service
@@ -141,38 +113,138 @@ openwrt-controller.service
     active (running)
     0.0.0.0:8080
 
-
 A remote client has successfully reached:
 
 http://10.77.77.2:8080
-
 
 and received:
 
 HTTP/1.1 200 OK
 
-Minor M0.0.3 cleanup
+Package Versioning
 
-One small cleanup remains before considering the milestone completely polished:
+The project now uses the Python package source as the authoritative version:
 
-Documentation=OpenWrt Pi Controller application
+src/openwrt_controller/__init__.py
 
+containing:
 
-should either be removed or replaced with an actual documentation URL, because systemd interprets Documentation= as a URL field.
+__version__ = "0.3.4"
 
-This does not block the functional milestone.
+pyproject.toml obtains the package version dynamically:
 
+[tool.setuptools.dynamic]
+version = {attr = "openwrt_controller.__version__"}
+
+Therefore:
+
+__init__.py
+     │
+     ▼
+__version__
+     │
+     ├── Python package version
+     ├── wheel version
+     ├── package metadata
+     └── Debian version validation
+
+A dedicated version test verifies that the first Debian changelog entry matches the Python package version.
+
+The build therefore fails if the package and Debian changelog disagree.
+
+This is intentional.
+
+The Debian build does not automatically rewrite the changelog. Version changes are source-control changes, not build-side effects.
+Test Suite
+
+The project currently contains 22 automated tests.
+
+The test suite covers:
+
+    application creation
+    application startup
+    database initialization
+    configuration defaults
+    logging
+    package metadata
+    systemd service definition
+    upgrade behavior
+    persistent data
+    service account preservation
+    version format
+    Python/Debian version consistency
+
+The complete suite currently passes:
+
+22 passed
+
+The Debian build invokes the same test suite automatically:
+
+debian/rules
+    │
+    └── override_dh_auto_test
+            │
+            └── .venv/bin/pytest -v
+
+This means a package build cannot complete successfully if the test suite fails.
+Development Environment
+
+A reproducible development environment is provided through:
+
+tools/setup-dev.sh
+
+The development environment installs:
+
+    the project
+    test dependencies
+    build dependencies
+
+The project uses a local Python virtual environment for development and testing.
+
+The Debian package build explicitly uses that environment for the project's test suite.
+Build Cleanliness
+
+Generated development and Debian packaging artifacts are excluded from Git.
+
+Examples include:
+
+.pybuild/
+debian/.debhelper/
+debian/debhelper-build-stamp
+debian/files
+debian/*.debhelper
+debian/*.debhelper.log
+debian/*.substvars
+debian/openwrt-pi-controller/
+
+The desired build behavior is:
+
+Source tree
+     │
+     ▼
+dpkg-buildpackage
+     │
+     ├── build wheel
+     ├── run tests
+     ├── assemble Debian package
+     └── produce .deb
+            │
+            ▼
+Tracked source remains unchanged
+
+This allows a successful package build to leave Git reporting a clean working tree.
 Immediate Roadmap
+
 M0.0.1  Development Foundation       ✅
     │
     ▼
 M0.0.2  Application Foundation       ✅
     │
     ▼
-M0.0.3  Debian Package              ✅
+M0.0.3  Debian Package               ✅
     │
     ▼
-M0.0.4  Release System               ← NEXT
+M0.0.4  Release System               🚧 CURRENT
     │
     ▼
 M0.0.5  OpenWrt Communication
@@ -208,33 +280,59 @@ M7      Advanced Network Functions
 M8      WNR1000v2 4 MB Firmware
 
 M0.0.4 — Release System
+Status: 🚧 Current Milestone
 
-Next milestone.
+The Debian package is now proven locally.
 
-The goal is to turn the currently functional local .deb build into a repeatable release mechanism.
+M0.0.4 should therefore focus on turning that working package into a repeatable, versioned, distributable release.
 
-M0.0.4 tasks
-Git tags
-versioning convention
-GitHub repository/release workflow
-GitHub Releases
-automated .deb build
-release artifact publishing
-installation instructions
-upgrade instructions
-changelog generation
-release verification
+The goal is not to redesign the Debian package.
+
+The goal is reproducibility and distribution.
+M0.0.4 Tasks
+
+    Git tags
+    versioning convention
+    GitHub repository/release workflow
+    GitHub Releases
+    automated .deb build
+    automated test execution
+    release artifact publishing
+    installation instructions
+    upgrade instructions
+    changelog/release-note process
+    release verification
+
+Versioning Model
+
+The version source of truth remains:
+
+src/openwrt_controller/__init__.py
+
+For example:
+
+__version__ = "0.3.4"
+
+The release process should validate that:
+
+Python version
+       =
+Debian changelog version
+       =
+Debian package version
+       =
+Git release tag
+
+No individual build step should silently change the source tree.
 Deliverable
 
-A tagged project release that produces:
+A tagged project release that automatically produces:
 
 openwrt-pi-controller_<version>_all.deb
 
+and makes that package available as a GitHub Release artifact.
 
-automatically and makes that package available as a release artifact.
-
-The local build/install path is already proven, so M0.0.4 should focus on reproducibility and distribution, not reworking the Debian package.
-
+The local build/install path is already proven, so M0.0.4 should focus on automation and distribution.
 M0.0.5 — OpenWrt Communication
 
 After release packaging, the next functional milestone is communication with a real OpenWrt device.
@@ -248,37 +346,38 @@ Pi
        ▼
     OpenWrt
 
-
 Initial capabilities:
 
-SSH connection
-host-key retrieval
-host-key storage
-connection timeout
-connection status
-command execution
-structured command results
-error handling
+    SSH connection
+    host-key retrieval
+    host-key storage
+    connection timeout
+    connection status
+    command execution
+    structured command results
+    error handling
+
 Deliverable
 
 The Pi can reliably establish an SSH session with a known-good OpenWrt router and execute commands.
-
 M0.1 — Pi Operating Environment
 
 Establish the actual Raspberry Pi deployment environment.
+Base Environment
 
-Base environment
-lightweight Raspberry Pi Linux
-Python 3
-OpenSSH client
-SQLite
-IP networking utilities
+    lightweight Raspberry Pi Linux
+    Python 3
+    OpenSSH client
+    SQLite
+    IP networking utilities
+
 Application
-Flask
-SQLite
-OpenSSH
-Python standard library
-controller service
+
+    Flask
+    SQLite
+    OpenSSH
+    Python standard library
+    controller service
 
 The initial architecture remains:
 
@@ -296,177 +395,183 @@ OpenSSH client
    ▼
 OpenWrt router
 
-
-The Debian package work completed in M0.0.3 provides the foundation for this deployment.
+The Debian package work completed in M0.0.3 provides the deployment foundation for this environment.
 
 A production WSGI server can be introduced later if required. The current Flask development server is acceptable for the initial development phase.
-
 M0.2 — Generic OpenWrt SSH Connection
 
 Connect the Pi to an existing known-good OpenWrt router.
 
 Implement:
 
-SSH connection
-host-key retrieval
-host-key storage
-connection timeout
-connection status
-command execution
-structured command results
+    SSH connection
+    host-key retrieval
+    host-key storage
+    connection timeout
+    connection status
+    command execution
+    structured command results
+
 Deliverable
+
 Pi → SSH → OpenWrt
 
-
 works reliably and provides machine-readable results to the controller.
-
 Phase 1 — Generic OpenWrt Discovery
 
 The controller moves from merely communicating with OpenWrt to understanding the device.
-
 M1.1 — System Discovery
 
 Retrieve:
 
-OpenWrt release
-kernel
-target
-architecture
-CPU
-RAM
-flash/storage
-hostname
-uptime
-system information
+    OpenWrt release
+    kernel
+    target
+    architecture
+    CPU
+    RAM
+    flash/storage
+    hostname
+    uptime
+    system information
+
 M1.2 — Network Discovery
 
 Retrieve:
 
-interfaces
-addresses
-routes
-link state
-interface statistics
-VLAN/device information
+    interfaces
+    addresses
+    routes
+    link state
+    interface statistics
+    VLAN/device information
+
 M1.3 — Wireless Discovery
 
 Retrieve:
 
-radios
-bands
-channels
-SSIDs
-AP/client state
-associated stations
-supported capabilities
+    radios
+    bands
+    channels
+    SSIDs
+    AP/client state
+    associated stations
+    supported capabilities
+
 M1.4 — Switch Discovery
 
 Retrieve:
 
-ports
-link state
-speed
-duplex
-VLAN information
-switch implementation
+    ports
+    link state
+    speed
+    duplex
+    VLAN information
+    switch implementation
 
 Support relevant OpenWrt switch architectures, including:
 
-swconfig
-DSA
+    swconfig
+    DSA
+
 M1.5 — System / LED / Log Discovery
 
 Retrieve:
 
-LEDs
-boot information
-system log
-kernel log
-available services
-installed packages
+    LEDs
+    boot information
+    system log
+    kernel log
+    available services
+    installed packages
+
 Phase 1 Deliverable
 
 The Pi can interrogate a generic OpenWrt device and generate a complete Device Profile.
-
 Phase 2 — Read-Only GUI
 
 The controller now exposes the discovered information through the web interface.
-
 M2.1 — GUI Framework
-Status
-System
-Network
-Wireless
-Switch
-Diagnostics
-Logs
+
+    Status
+    System
+    Network
+    Wireless
+    Switch
+    Diagnostics
+    Logs
 
 M2.2 — Status
 
 Display:
 
-device identity
-firmware
-uptime
-memory
-CPU
-network state
-Pi/controller connection
+    device identity
+    firmware
+    uptime
+    memory
+    CPU
+    network state
+    Pi/controller connection
+
 M2.3 — System
 
 Display:
 
-OpenWrt version
-kernel
-architecture
-hardware
-installed packages
-boot information
+    OpenWrt version
+    kernel
+    architecture
+    hardware
+    installed packages
+    boot information
+
 M2.4 — Network
 
 Display:
 
-interfaces
-IP addresses
-routes
-VLANs
-link state
-interface statistics
+    interfaces
+    IP addresses
+    routes
+    VLANs
+    link state
+    interface statistics
+
 M2.5 — Wireless
 
 Display:
 
-radio information
-current configuration
-channel
-association state
-connected clients
+    radio information
+    current configuration
+    channel
+    association state
+    connected clients
+
 M2.6 — Switch
 
 Display:
 
-physical ports
-link
-speed
-duplex
-VLAN membership
+    physical ports
+    link
+    speed
+    duplex
+    VLAN membership
+
 M2.7 — Diagnostics
 
 Display:
 
-system health
-logs
-connectivity
-interface statistics
+    system health
+    logs
+    connectivity
+    interface statistics
+
 Phase 2 Deliverable
 
 A user can connect to the Pi and browse an OpenWrt-style, read-only representation of the connected router.
-
 Phase 3 — Live Diagnostics
 
 The controller begins providing live information rather than only cached discovery data.
-
 M3.1 — Live Wi-Fi Scanning
+
 GUI
  ↓
 Pi
@@ -481,101 +586,98 @@ Pi
  ↓
 GUI
 
-
 Each scan is performed on demand.
-
 M3.2 — Port Monitoring
 
 Display live:
 
-link
-speed
-duplex
-port state
+    link
+    speed
+    duplex
+    port state
+
 M3.3 — Interface Monitoring
 
 Collect:
 
-packets
-bytes
-errors
-link state
+    packets
+    bytes
+    errors
+    link state
+
 M3.4 — Device Health
 
 Collect:
 
-uptime
-memory
-load
-temperature where available
-boot state
+    uptime
+    memory
+    load
+    temperature where available
+    boot state
+
 Deliverable
 
 A useful OpenWrt diagnostic console.
-
 Phase 4 — Device History
 
 The Pi becomes the persistent record of the router.
-
 M4.1 — Device Identity History
 
 Record:
 
-factory MAC
-operational MAC
-firmware
-hardware identity
-SSH identity
+    factory MAC
+    operational MAC
+    firmware
+    hardware identity
+    SSH identity
+
 M4.2 — Configuration Snapshots
 
 Read and store router configuration.
 
 Generate:
 
-configuration revisions
-configuration hashes
+    configuration revisions
+    configuration hashes
+
 M4.3 — Event History
 
 Record:
 
-boots
-firmware changes
-configuration changes
-MAC changes
-Wi-Fi events
-network events
+    boots
+    firmware changes
+    configuration changes
+    MAC changes
+    Wi-Fi events
+    network events
+
 M4.4 — Device Replacement
 
 Support retiring one physical router and creating a new Device Profile while preserving historical records.
-
 Deliverable
 
 The Pi becomes the router's persistent historical record.
-
 Phase 5 — Controlled Configuration
 
 This is the transition from observation to management.
-
 M5.1 — Configuration Abstraction
 
 Create a controller API representing:
 
-Network
-Wireless
-Switch
-VLAN
-LED
-System
-MAC
-
+    Network
+    Wireless
+    Switch
+    VLAN
+    LED
+    System
+    MAC
 
 independently of the underlying OpenWrt commands.
-
 M5.2 — Validation
 
 Allow configuration to be staged and validated before application.
-
 M5.3 — Transactional Changes
+
 Read
  ↓
 Stage
@@ -591,79 +693,72 @@ Commit
 M5.4 — Automatic Rollback
 
 Recover automatically from configuration changes that interrupt controller connectivity.
-
 Deliverable
 
 Safe remote OpenWrt configuration management.
-
 Phase 6 — Pi Network Services
 
 The Pi begins taking responsibility for services that transform the legacy router into a modern network platform.
-
 M6.1 — DHCP
 
 Pi becomes the DHCP authority.
-
 M6.2 — DNS Filtering
 
 Introduce Pi-hole and local DHCP integration.
-
 M6.3 — Recursive DNS
 
 Introduce Unbound.
-
 M6.4 — Routing / NAT
 
 Pi becomes the network gateway.
-
 M6.5 — Firewall
 
 Pi becomes the primary security boundary.
-
 Deliverable
 
 The Pi becomes the network control plane.
-
 Phase 7 — Advanced Network Functions
 
 Add:
 
-WireGuard
-OpenVPN where appropriate
-traffic analysis
-historical bandwidth
-VLAN policy
-network segmentation
-client/device identification
-security monitoring
+    WireGuard
+    OpenVPN where appropriate
+    traffic analysis
+    historical bandwidth
+    VLAN policy
+    network segmentation
+    client/device identification
+    security monitoring
 
 Traffic processing remains on the Pi.
 
 The WNR provides:
 
-switching
-radio hardware
-lightweight statistics
-physical network interfaces
+    switching
+    radio hardware
+    lightweight statistics
+    physical network interfaces
+
 Phase 8 — WNR1000v2 4 MB Image
 
 Only after the generic controller is sufficiently mature does the project begin aggressive firmware minimization.
-
 M8.1 — Known-Good Reference
 
 Document the existing functional WNR OpenWrt image:
 
-OpenWrt release
-target
-kernel
-packages
-configuration
-flash usage
-RAM usage
-wireless driver
-switch architecture
-LED implementation
+    OpenWrt release
+    target
+    kernel
+    packages
+    configuration
+    flash usage
+    RAM usage
+    wireless driver
+    switch architecture
+    LED implementation
+
 M8.2 — Hardware Profile
+
 WNR1000v2
     ↓
 hardware capabilities
@@ -673,7 +768,6 @@ required OpenWrt components
 M8.3 — Minimal Image Definition
 
 The conceptual package set remains:
-
 Function	OpenWrt component
 Base	base-files
 Core utilities	busybox
@@ -691,46 +785,43 @@ LEDs	target-specific
 Kernel modules	target-specific minimum
 
 The exact package list must be generated against the actual WNR1000v2 OpenWrt target.
-
 M8.4 — ImageBuilder Build
 
 Generate the dedicated image using OpenWrt's supported image-generation tooling.
-
 M8.5 — Functional Test
 
 Validate:
 
-boot
-Ethernet
-Controller Port
-VLAN
-Wi-Fi AP
-Wi-Fi client
-Wi-Fi scanning
-SSH
-LEDs
-factory MAC
-operational MAC
-logs
-diagnostics
-Pi communication
+    boot
+    Ethernet
+    Controller Port
+    VLAN
+    Wi-Fi AP
+    Wi-Fi client
+    Wi-Fi scanning
+    SSH
+    LEDs
+    factory MAC
+    operational MAC
+    logs
+    diagnostics
+    Pi communication
+
 M8.6 — Resource Optimization
 
 Measure:
 
-flash
-RAM
-CPU
-boot time
-Wi-Fi performance
-Ethernet performance
+    flash
+    RAM
+    CPU
+    boot time
+    Wi-Fi performance
+    Ethernet performance
 
 Then optimize while preserving the controller contract.
-
 Phase 8 Deliverable
 
 A purpose-built WNR1000v2 OpenWrt image providing the minimum hardware functionality required by the generic Pi controller.
-
 Router Responsibilities
 
 The eventual 4 MB router image is centered around:
@@ -765,20 +856,18 @@ Diagnostics
 ├── boot information
 └── system health
 
-
 The Controller Port is always the physical WAN jack.
 
-Its logical purpose depends on deployment:
-
+Its logical purpose depends on deployment.
 Home / AP deployment
-    Controller Port → upstream/home Ethernet
+
+Controller Port → upstream/home Ethernet
 
 Travel deployment
-    Controller Port → Raspberry Pi
 
+Controller Port → Raspberry Pi
 
 The physical WAN jack therefore becomes the standardized Pi connection point while retaining flexibility in the logical network design.
-
 MAC Identity
 
 The router maintains two MAC identities:
@@ -791,16 +880,13 @@ Operational MAC
     │
     └── active network identity
 
-
 Normal home/AP operation:
 
 Operational MAC = Factory MAC
 
-
 Travel mode permits the Pi to configure the operational MAC.
 
 This provides a foundation for future synthetic/randomized MAC functionality without losing predictable hardware identity.
-
 Device Profile
 
 The Pi maintains one active Device Profile for the router it manages.
@@ -832,9 +918,7 @@ Device
 │
 └── Current state
 
-
 The profile will become the foundation for generic OpenWrt compatibility, device history, diagnostics, and eventually controlled configuration.
-
 Final Architecture
 
 The intended final platform remains:
@@ -919,11 +1003,97 @@ WNR1000v2 hardware profile
       ▼
 Minimal 4 MB OpenWrt image
 
+This keeps the generic Pi controller ahead of the hardware-specific optimization work.
 
-This keeps the generic Pi controller ahead of the hardware-specific optimization work. That is important: the WNR1000v2 should ultimately become a constrained hardware endpoint for a mature controller, rather than forcing the controller architecture to be designed around the limitations of a 4 MB / 32 MB router.
+That is important: the WNR1000v2 should ultimately become a constrained hardware endpoint for a mature controller, rather than forcing the controller architecture to be designed around the limitations of a 4 MB / 32 MB router.
+Current Checkpoint
 
-Current checkpoint
+The project has completed the initial development, application, and Debian packaging foundation.
+Completed
 
-We are now at the end of M0.0.3 and ready to begin M0.0.4 — Release System.
+M0.0.1  Development Foundation       ✅
+M0.0.2  Application Foundation       ✅
+M0.0.3  Debian Package               ✅
 
-The immediate next objective is therefore not more Debian/service debugging. That portion is working. The next work should be making the successful .deb build reproducible and distributable through tagged releases and automated package generation, followed by the first real OpenWrt SSH communication milestone.
+The current package is version:
+
+0.3.4
+
+The Python package version is the authoritative version source, and the Debian changelog is automatically validated against it during testing.
+
+The current test suite contains:
+
+22 tests
+22 passed
+
+A complete local Debian build has been successfully demonstrated:
+
+Python source
+      ↓
+PEP 517 / setuptools
+      ↓
+Python wheel
+      ↓
+pytest
+      ↓
+Debian package
+      ↓
+openwrt-pi-controller_0.3.4_all.deb
+
+The build completes successfully and the generated Debian build artifacts are excluded from version control.
+Current Objective
+
+The project is now at:
+
+M0.0.4 — Release System
+
+The immediate objective is to take the proven local build and make it reproducible through GitHub-based release automation.
+
+The next release-system goals are:
+
+    Establish the Git tagging/versioning convention.
+    Add GitHub Actions CI.
+    Run the 22-test suite automatically.
+    Build the Debian package automatically.
+    Verify package/version consistency.
+    Publish the .deb as a GitHub Release artifact.
+    Document installation and upgrade procedures.
+    Establish a repeatable release process.
+
+Once M0.0.4 is complete, development moves to the first real OpenWrt communication layer.
+
+The next major functional transition will therefore be:
+
+                  CURRENT
+                     │
+                     ▼
+        ┌────────────────────────┐
+        │ M0.0.4 Release System  │
+        │                        │
+        │ CI                     │
+        │ Tests                  │
+        │ Build                  │
+        │ Git tags               │
+        │ GitHub Releases        │
+        └───────────┬────────────┘
+                    │
+                    ▼
+        ┌────────────────────────┐
+        │ M0.0.5 OpenWrt         │
+        │ Communication          │
+        │                        │
+        │ SSH                    │
+        │ Host keys              │
+        │ Commands               │
+        │ Structured results     │
+        └───────────┬────────────┘
+                    │
+                    ▼
+              Generic OpenWrt
+                 Discovery
+
+The Debian/package foundation is no longer the primary development risk. The project is now ready to move from packaging infrastructure into actual OpenWrt device communication.
+
+The biggest status change is that I would remove the old "Minor M0.0.3 cleanup" section entirely. You've already moved beyond that: the versioning check works, the build succeeds, the tests run as part of the build, and the generated artifacts can be ignored by Git.
+
+One thing I'd keep an eye on before declaring M0.0.4 complete is the release workflow itself. That's now the meaningful remaining piece between your working local .deb and a proper installable project release.

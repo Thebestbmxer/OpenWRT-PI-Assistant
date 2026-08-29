@@ -1,3 +1,9 @@
+openwrt-pi-controller (0.3.5) unstable; urgency=medium
+
+  * Description of changes.
+
+ -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Sat, 29 Aug 2026 00:00:00 +0000
+
 openwrt-pi-controller (0.3.4) unstable; urgency=medium
 
   * Update project version.
