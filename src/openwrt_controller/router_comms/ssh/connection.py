@@ -11,7 +11,7 @@ from openwrt_controller.router_comms.discovery.router_discovery import (
 from openwrt_controller.router_comms.exceptions import (
     InitialCommunicationError,
 )
-from openwrt_controller.router_comms.ssh_keys import SSHKeyPair
+from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
 
 
 @dataclass(frozen=True)
