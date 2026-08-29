@@ -63,7 +63,7 @@ def test_install_command_creates_ssh_directory_and_authorized_keys(
 def test_install_command_contains_public_key(
     client: MagicMock,
     key_pair: SSHKeyPair,
-
+):
     installer = RouterKeyInstaller()
 
     installer.install(key_pair)
@@ -115,7 +115,7 @@ def test_install_sets_ssh_directory_permissions(
 def test_install_sets_authorized_keys_permissions(
     client: MagicMock,
     key_pair: SSHKeyPair,
-
+):
     installer = RouterKeyInstaller()
 
     installer.install(key_pair)
