@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -43,30 +42,50 @@ def bootstrap():
 
 
 @pytest.fixture
+def installer():
+    return Mock()
+
+
+@pytest.fixture
 def connection():
     connection = Mock()
     connection.connected = True
     return connection
 
 
-def create_provisioner(
+@pytest.fixture
+def provisioner(
     key_manager,
     discovery,
     bootstrap,
+    installer,
     connection,
 ):
-    return RouterProvisioner(
+    bootstrap_factory = Mock(return_value=bootstrap)
+    installer_factory = Mock(return_value=installer)
+    connection_factory = Mock(return_value=connection)
+
+    instance = RouterProvisioner(
         key_manager=key_manager,
         discovery=discovery,
-        bootstrap_factory=Mock(return_value=bootstrap),
-        connection_factory=Mock(return_value=connection),
+        bootstrap_factory=bootstrap_factory,
+        installer_factory=installer_factory,
+        connection_factory=connection_factory,
     )
+
+    instance.bootstrap_factory_mock = bootstrap_factory
+    instance.installer_factory_mock = installer_factory
+    instance.connection_factory_mock = connection_factory
+
+    return instance
 
 
 def test_provision_loads_existing_key(
+    provisioner,
     key_manager,
     discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -76,13 +95,6 @@ def test_provision_loads_existing_key(
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
-
     result = provisioner.provision(candidate)
 
     assert result == candidate
@@ -90,11 +102,20 @@ def test_provision_loads_existing_key(
     key_manager.load_key_pair.assert_called_once_with()
     key_manager.generate_key_pair.assert_not_called()
 
+    discovery.discover.assert_not_called()
+    bootstrap.connect.assert_called_once_with()
+    installer.install.assert_called_once_with(key_pair)
+    client.close.assert_called_once_with()
+
+    connection.connect.assert_called_once_with()
+    connection.close.assert_called_once_with()
+
 
 def test_provision_generates_key_when_missing(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -105,13 +126,6 @@ def test_provision_generates_key_when_missing(
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
-
     result = provisioner.provision(candidate)
 
     assert result == candidate
@@ -119,11 +133,17 @@ def test_provision_generates_key_when_missing(
     key_manager.load_key_pair.assert_called_once_with()
     key_manager.generate_key_pair.assert_called_once_with()
 
+    installer.install.assert_called_once_with(key_pair)
+    client.close.assert_called_once_with()
+    connection.connect.assert_called_once_with()
+
 
 def test_provision_discovers_when_candidate_not_supplied(
+    provisioner,
     key_manager,
     discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -134,23 +154,20 @@ def test_provision_discovers_when_candidate_not_supplied(
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
-
     result = provisioner.provision()
 
     assert result == candidate
+
     discovery.discover.assert_called_once_with()
+    provisioner.bootstrap_factory_mock.assert_called_once_with(candidate)
 
 
 def test_provision_does_not_discover_when_candidate_supplied(
+    provisioner,
     key_manager,
     discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -160,22 +177,17 @@ def test_provision_does_not_discover_when_candidate_supplied(
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
+    result = provisioner.provision(candidate)
 
-    provisioner.provision(candidate)
-
+    assert result == candidate
     discovery.discover.assert_not_called()
 
 
 def test_provision_installs_public_key(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -184,48 +196,28 @@ def test_provision_installs_public_key(
 
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
-
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
 
     provisioner.provision(candidate)
 
-    assert client.close.called
-    connection.connect.assert_called_once_with()
+    provisioner.installer_factory_mock.assert_called_once_with(client)
+    installer.install.assert_called_once_with(key_pair)
 
 
 def test_bootstrap_connection_is_closed_when_install_fails(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
-    monkeypatch,
 ):
     key_manager.load_key_pair.return_value = key_pair
 
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    installer = Mock()
     installer.install.side_effect = RuntimeError("install failed")
-
-    monkeypatch.setattr(
-        "openwrt_controller.router_comms.provisioner.RouterKeyInstaller",
-        Mock(return_value=installer),
-    )
-
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
 
     with pytest.raises(RuntimeError, match="install failed"):
         provisioner.provision(candidate)
@@ -235,9 +227,10 @@ def test_bootstrap_connection_is_closed_when_install_fails(
 
 
 def test_provision_connects_using_controller_key(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -247,28 +240,21 @@ def test_provision_connects_using_controller_key(
     client = Mock()
     bootstrap.connect.return_value = (client, Mock())
 
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
-    )
-
     provisioner.provision(candidate)
 
-    assert provisioner.connection_factory.call_args.args == (
+    provisioner.connection_factory_mock.assert_called_once_with(
         candidate,
         key_pair,
     )
 
     connection.connect.assert_called_once_with()
-    connection.close.assert_called_once_with()
 
 
 def test_provision_closes_bootstrap_before_permanent_connection(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -280,16 +266,11 @@ def test_provision_closes_bootstrap_before_permanent_connection(
 
     events = []
 
-    client.close.side_effect = lambda: events.append("bootstrap-close")
+    client.close.side_effect = lambda: events.append(
+        "bootstrap-close"
+    )
     connection.connect.side_effect = lambda: events.append(
         "permanent-connect"
-    )
-
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
     )
 
     provisioner.provision(candidate)
@@ -301,9 +282,10 @@ def test_provision_closes_bootstrap_before_permanent_connection(
 
 
 def test_provision_failure_to_connect_is_propagated(
+    provisioner,
     key_manager,
-    discovery,
     bootstrap,
+    installer,
     connection,
     candidate,
     key_pair,
@@ -315,13 +297,6 @@ def test_provision_failure_to_connect_is_propagated(
 
     connection.connect.side_effect = RuntimeError(
         "permanent connection failed"
-    )
-
-    provisioner = create_provisioner(
-        key_manager,
-        discovery,
-        bootstrap,
-        connection,
     )
 
     with pytest.raises(

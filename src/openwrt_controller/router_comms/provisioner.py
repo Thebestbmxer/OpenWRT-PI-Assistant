@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Callable
 
+import paramiko
+
 from openwrt_controller.router_comms.discovery.bootstrap import (
     RouterBootstrap,
 )
@@ -32,7 +34,14 @@ class RouterProvisioner:
         self,
         key_manager: SSHKeyManager,
         discovery: RouterDiscovery,
-        bootstrap_factory: Callable[[RouterCandidate], RouterBootstrap],
+        bootstrap_factory: Callable[
+            [RouterCandidate],
+            RouterBootstrap,
+        ],
+        installer_factory: Callable[
+            [paramiko.SSHClient],
+            RouterKeyInstaller,
+        ],
         connection_factory: Callable[
             [RouterCandidate, SSHKeyPair],
             RouterConnection,
@@ -41,6 +50,7 @@ class RouterProvisioner:
         self.key_manager = key_manager
         self.discovery = discovery
         self.bootstrap_factory = bootstrap_factory
+        self.installer_factory = installer_factory
         self.connection_factory = connection_factory
 
     def provision(
@@ -68,7 +78,7 @@ class RouterProvisioner:
         client, _credentials = bootstrap.connect()
 
         try:
-            installer = RouterKeyInstaller(client)
+            installer = self.installer_factory(client)
             installer.install(key_pair)
         finally:
             client.close()
