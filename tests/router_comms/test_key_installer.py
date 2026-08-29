@@ -32,7 +32,26 @@ def key_pair(tmp_path: Path) -> SSHKeyPair:
 
 @pytest.fixture
 def client() -> MagicMock:
-    return MagicMock(spec=paramiko.SSHClient)
+    client = MagicMock(spec=paramiko.SSHClient)
+
+    transport = MagicMock()
+    transport.is_active.return_value = True
+    client.get_transport.return_value = transport
+
+    stdin = MagicMock()
+    stdout = MagicMock()
+    stderr = MagicMock()
+
+    stdout.channel.recv_exit_status.return_value = 0
+    stderr.read.return_value = b""
+
+    client.exec_command.return_value = (
+        stdin,
+        stdout,
+        stderr,
+    )
+
+    return client
 
 
 def test_installs_public_key(
