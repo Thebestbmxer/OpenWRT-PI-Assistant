@@ -7,7 +7,7 @@ class Config:
 
     # Application
     APP_NAME = "OpenWrt Pi Controller"
-    APP_VERSION = __version__ #"0.1.0"
+    APP_VERSION = "0.1.0"
     DEBUG = False
 
     APPLICATION_USER = os.getenv(
