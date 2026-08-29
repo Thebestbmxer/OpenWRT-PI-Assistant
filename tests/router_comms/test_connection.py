@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import paramiko
 import pytest
 
-from openwrt_controller.router_comms.connection import (
+from openwrt_controller.router_comms.ssh.connection import (
     RouterConnection,
 )
 from openwrt_controller.router_comms.discovery.router_discovery import (
