@@ -70,7 +70,7 @@ def test_connect_marks_connection_active(
     client.get_transport.return_value = transport
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -101,7 +101,7 @@ def test_execute_returns_command_result(
     )
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -138,7 +138,7 @@ def test_connection_error_is_wrapped(
     client.connect.side_effect = OSError("connection refused")
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -157,7 +157,7 @@ def test_authentication_error_is_wrapped(
     client.connect.side_effect = paramiko.AuthenticationException()
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -175,7 +175,7 @@ def test_close_disconnects_client(
     client = MagicMock()
 
     with patch(
-        "openwrt_controller.router_comms.connection.paramiko.SSHClient",
+        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
