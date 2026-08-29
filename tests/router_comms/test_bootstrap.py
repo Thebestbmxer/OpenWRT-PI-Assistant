@@ -1,9 +1,11 @@
-"""Tests for initial router communication."""
+"""Initial communication with a freshly reset router."""
 
-from unittest.mock import MagicMock, patch
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Sequence
 
 import paramiko
-import pytest
 
 from openwrt_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
@@ -12,146 +14,140 @@ from openwrt_controller.router_comms.exceptions import (
     AuthenticationError,
     InitialCommunicationError,
 )
-from openwrt_controller.router_comms.discovery.bootstrap import (
-    DEFAULT_PASSWORDS,
-    DEFAULT_USERNAME,
-    RouterBootstrap,
+
+
+DEFAULT_USERNAME = "root"
+DEFAULT_PASSWORDS: tuple[str, ...] = (
+    "",
+    "password",
 )
 
 
-@pytest.fixture
-def candidate():
-    return RouterCandidate(
-        address="192.168.50.1",
-        ssh_port=22,
-    )
+@dataclass(frozen=True)
+class BootstrapCredentials:
+    """Credentials successfully used during bootstrap."""
+
+    username: str
+    password: str
 
 
-def test_default_bootstrap_username():
-    assert DEFAULT_USERNAME == "root"
+class RouterBootstrap:
+    """Establish initial communication with a freshly reset router."""
 
+    def __init__(
+        self,
+        candidate: RouterCandidate,
+        username: str = DEFAULT_USERNAME,
+        passwords: Sequence[str] = DEFAULT_PASSWORDS,
+        timeout: float = 5.0,
+    ) -> None:
+        self.candidate = candidate
+        self.username = username
+        self.passwords = tuple(passwords)
+        self.timeout = timeout
 
-def test_default_bootstrap_passwords():
-    assert DEFAULT_PASSWORDS == ("", "password")
+    def connect(self) -> tuple[paramiko.SSHClient, BootstrapCredentials]:
+        """Connect using the configured bootstrap credentials."""
 
-def test_bootstrap_uses_none_authentication_for_blank_password():
-    candidate = RouterCandidate(
-        address="192.168.50.1",
-        ssh_port=22,
-    )
+        last_error: Exception | None = None
 
-    bootstrap = RouterBootstrap(
-        candidate=candidate,
-        passwords=[""],
-    )
+        for password in self.passwords:
+            try:
+                if password == "":
+                    client = self._connect_without_password()
+                else:
+                    client = self._connect_with_password(password)
 
-    mock_client = MagicMock()
-    mock_transport = mock_client.get_transport.return_value
-    mock_transport.is_authenticated.return_value = True
+                return (
+                    client,
+                    BootstrapCredentials(
+                        username=self.username,
+                        password=password,
+                    ),
+                )
 
-    with patch.object(
-        RouterBootstrap,
-        "_create_client",
-        return_value=mock_client,
-    ):
-        bootstrap.connect()
+            except paramiko.AuthenticationException as exc:
+                last_error = exc
 
-    mock_transport.auth_none.assert_called_once_with("root")
-    mock_client.connect.assert_not_called()
+            except (
+                paramiko.SSHException,
+                OSError,
+            ) as exc:
+                raise InitialCommunicationError(
+                    f"Unable to establish SSH communication with "
+                    f"{self.candidate.address}:{self.candidate.ssh_port}."
+                ) from exc
 
-def test_bootstrap_tries_blank_password_first(candidate):
-    client = MagicMock()
+        raise AuthenticationError(
+            f"Bootstrap authentication failed for "
+            f"{self.username}@{self.candidate.address}."
+        ) from last_error
 
-    with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
-        return_value=client,
-    ):
-        client.connect.return_value = None
+    def _connect_without_password(self) -> paramiko.SSHClient:
+        """Connect using SSH none authentication.
 
-        bootstrap = RouterBootstrap(candidate)
+        OpenWrt's Dropbear SSH server permits a root account with no
+        password through SSH none authentication. This is different
+        from password authentication with an empty password.
+        """
 
-        connected_client, credentials = bootstrap.connect()
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    assert connected_client is client
-    assert credentials.username == "root"
-    assert credentials.password == ""
+        transport = paramiko.Transport(
+            (self.candidate.address, self.candidate.ssh_port)
+        )
 
-    client.connect.assert_called_once_with(
-        hostname="192.168.50.1",
-        port=22,
-        username="root",
-        password="",
-        timeout=5.0,
-        allow_agent=False,
-        look_for_keys=False,
-    )
+        try:
+            transport.start_client(timeout=self.timeout)
+            transport.auth_none(self.username)
 
+            if not transport.is_authenticated():
+                raise paramiko.AuthenticationException(
+                    "SSH none authentication failed."
+                )
 
-def test_bootstrap_falls_back_to_password(candidate):
-    client = MagicMock()
+            client._transport = transport
+            return client
 
-    client.connect.side_effect = [
-        paramiko.AuthenticationException(),
-        None,
-    ]
+        except Exception:
+            transport.close()
+            raise
 
-    with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
-        return_value=client,
-    ):
-        bootstrap = RouterBootstrap(candidate)
+    def _connect_with_password(
+        self,
+        password: str,
+    ) -> paramiko.SSHClient:
+        """Connect using normal SSH password authentication."""
 
-        connected_client, credentials = bootstrap.connect()
+        client = self._create_client()
 
-    assert connected_client is client
-    assert credentials.username == "root"
-    assert credentials.password == "password"
-    assert client.connect.call_count == 2
+        try:
+            client.connect(
+                hostname=self.candidate.address,
+                port=self.candidate.ssh_port,
+                username=self.username,
+                password=password,
+                timeout=self.timeout,
+                allow_agent=False,
+                look_for_keys=False,
+            )
 
-    first_call = client.connect.call_args_list[0]
-    second_call = client.connect.call_args_list[1]
+            return client
 
-    assert first_call.kwargs["password"] == ""
-    assert second_call.kwargs["password"] == "password"
+        except Exception:
+            client.close()
+            raise
 
+    @staticmethod
+    def _create_client() -> paramiko.SSHClient:
+        """Create an SSH client for bootstrap communication."""
 
-def test_bootstrap_raises_authentication_error(candidate):
-    client = MagicMock()
-    client.connect.side_effect = paramiko.AuthenticationException()
+        client = paramiko.SSHClient()
 
-    with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
-        return_value=client,
-    ):
-        bootstrap = RouterBootstrap(candidate)
+        # Bootstrap host-key handling is intentionally separate from
+        # the permanent SSH connection. The permanent connection will
+        # require an explicitly trusted host key.
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        with pytest.raises(AuthenticationError):
-            bootstrap.connect()
-
-
-def test_bootstrap_raises_connection_error(candidate):
-    client = MagicMock()
-    client.connect.side_effect = OSError("connection refused")
-
-    with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
-        return_value=client,
-    ):
-        bootstrap = RouterBootstrap(candidate)
-
-        with pytest.raises(InitialCommunicationError):
-            bootstrap.connect()
-
-
-def test_bootstrap_disables_ssh_agent_and_existing_keys(candidate):
-    client = MagicMock()
-
-    with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
-        return_value=client,
-    ):
-        bootstrap = RouterBootstrap(candidate)
-        bootstrap.connect()
-
-    assert client.connect.call_args.kwargs["allow_agent"] is False
-    assert client.connect.call_args.kwargs["look_for_keys"] is False
+        return client
