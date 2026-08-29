@@ -4,7 +4,9 @@ from unittest.mock import patch
 
 import pytest
 
+from openwrt_controller.router_comms.discovery import router_discovery
 from openwrt_controller.router_comms.discovery.router_discovery import (
+    RouterCandidate,
     RouterDiscovery,
 )
 from openwrt_controller.router_comms.exceptions import RouterNotFoundError
@@ -25,6 +27,7 @@ def test_discovery_returns_reachable_candidate():
     assert isinstance(candidate, RouterCandidate)
     assert candidate.address == "192.168.50.1"
     assert candidate.ssh_port == 22
+
 
 def test_discovery_ignores_loopback_addresses():
     addresses = [
