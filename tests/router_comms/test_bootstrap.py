@@ -34,6 +34,30 @@ def test_default_bootstrap_username():
 def test_default_bootstrap_passwords():
     assert DEFAULT_PASSWORDS == ("", "password")
 
+def test_bootstrap_uses_none_authentication_for_blank_password():
+    candidate = RouterCandidate(
+        address="192.168.50.1",
+        ssh_port=22,
+    )
+
+    bootstrap = RouterBootstrap(
+        candidate=candidate,
+        passwords=[""],
+    )
+
+    mock_client = MagicMock()
+    mock_transport = mock_client.get_transport.return_value
+    mock_transport.is_authenticated.return_value = True
+
+    with patch.object(
+        RouterBootstrap,
+        "_create_client",
+        return_value=mock_client,
+    ):
+        bootstrap.connect()
+
+    mock_transport.auth_none.assert_called_once_with("root")
+    mock_client.connect.assert_not_called()
 
 def test_bootstrap_tries_blank_password_first(candidate):
     client = MagicMock()

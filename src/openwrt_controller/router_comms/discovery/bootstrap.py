@@ -60,15 +60,10 @@ class RouterBootstrap:
             client = self._create_client()
 
             try:
-                client.connect(
-                    hostname=self.candidate.address,
-                    port=self.candidate.ssh_port,
-                    username=self.username,
-                    password=password,
-                    timeout=self.timeout,
-                    allow_agent=False,
-                    look_for_keys=False,
-                )
+                if password == "":
+                    self._authenticate_without_password(client)
+                else:
+                    self._authenticate_with_password(client, password)
 
                 credentials = BootstrapCredentials(
                     username=self.username,
@@ -96,8 +91,64 @@ class RouterBootstrap:
             f"{self.username}@{self.candidate.address}."
         ) from last_error
 
-    @staticmethod
-    def _create_client() -> paramiko.SSHClient:
+    def _authenticate_without_password(
+        self,
+        client: paramiko.SSHClient,
+    ) -> None:
+        """Authenticate using OpenSSH/Dropbear's none method.
+
+        Fresh OpenWrt routers may permit root login without a password.
+        Dropbear accepts this through SSH 'none' authentication rather
+        than Paramiko's password authentication with an empty string.
+        """
+
+        transport = client.get_transport()
+
+        if transport is None:
+            raise paramiko.SSHException(
+                "SSH transport is not available after connection."
+            )
+
+        try:
+            transport.auth_none(self.username)
+        except paramiko.BadAuthenticationType as exc:
+            raise paramiko.AuthenticationException(
+                "Router does not permit passwordless bootstrap authentication."
+            ) from exc
+
+        if not transport.is_authenticated():
+            raise paramiko.AuthenticationException(
+                "Passwordless bootstrap authentication failed."
+            )
+
+    def _authenticate_with_password(
+        self,
+        client: paramiko.SSHClient,
+        password: str,
+    ) -> None:
+        """Authenticate using a non-empty password."""
+
+        transport = client.get_transport()
+
+        if transport is None:
+            raise paramiko.SSHException(
+                "SSH transport is not available after connection."
+            )
+
+        try:
+            transport.auth_password(
+                username=self.username,
+                password=password,
+            )
+        except paramiko.AuthenticationException:
+            raise
+
+        if not transport.is_authenticated():
+            raise paramiko.AuthenticationException(
+                "Password authentication failed."
+            )
+
+    def _create_client(self) -> paramiko.SSHClient:
         """Create an SSH client for bootstrap communication."""
 
         client = paramiko.SSHClient()
@@ -106,5 +157,18 @@ class RouterBootstrap:
         # the permanent SSH connection. The permanent connection will
         # require an explicitly trusted host key.
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Establish the transport first. Authentication is performed
+        # explicitly so that fresh OpenWrt routers can use SSH 'none'
+        # authentication for a blank root password.
+        client.connect(
+            hostname=self.candidate.address,
+            port=self.candidate.ssh_port,
+            username=None,
+            password=None,
+            timeout=self.timeout,
+            allow_agent=False,
+            look_for_keys=False,
+        )
 
         return client
