@@ -32,12 +32,7 @@ class BootstrapCredentials:
 
 
 class RouterBootstrap:
-    """Establish initial password-based communication.
-
-    This class is intended only for the initial setup of a router.
-    Once SSH key authentication has been established, normal router
-    communication must use the permanent SSH connection layer.
-    """
+    """Establish initial communication with a freshly reset router."""
 
     def __init__(
         self,
@@ -57,13 +52,11 @@ class RouterBootstrap:
         last_error: Exception | None = None
 
         for password in self.passwords:
-            client = self._create_client()
-
             try:
                 if password == "":
-                    self._authenticate_without_password(client)
+                    client = self._connect_without_password()
                 else:
-                    self._authenticate_with_password(client, password)
+                    client = self._connect_with_password(password)
 
                 credentials = BootstrapCredentials(
                     username=self.username,
@@ -74,13 +67,11 @@ class RouterBootstrap:
 
             except paramiko.AuthenticationException as exc:
                 last_error = exc
-                client.close()
 
             except (
                 paramiko.SSHException,
                 OSError,
             ) as exc:
-                client.close()
                 raise InitialCommunicationError(
                     f"Unable to establish SSH communication with "
                     f"{self.candidate.address}:{self.candidate.ssh_port}."
@@ -91,64 +82,68 @@ class RouterBootstrap:
             f"{self.username}@{self.candidate.address}."
         ) from last_error
 
-    def _authenticate_without_password(
-        self,
-        client: paramiko.SSHClient,
-    ) -> None:
-        """Authenticate using OpenSSH/Dropbear's none method.
+    def _connect_without_password(self) -> paramiko.SSHClient:
+        """Connect using SSH none authentication.
 
-        Fresh OpenWrt routers may permit root login without a password.
-        Dropbear accepts this through SSH 'none' authentication rather
-        than Paramiko's password authentication with an empty string.
+        OpenWrt's Dropbear server can accept a root account with no
+        password through SSH 'none' authentication. This is different
+        from password authentication with an empty password.
         """
 
-        transport = client.get_transport()
+        client = self._create_client()
 
-        if transport is None:
-            raise paramiko.SSHException(
-                "SSH transport is not available after connection."
-            )
+        transport = paramiko.Transport(
+            (self.candidate.address, self.candidate.ssh_port)
+        )
 
         try:
+            transport.start_client(timeout=self.timeout)
             transport.auth_none(self.username)
-        except paramiko.BadAuthenticationType as exc:
-            raise paramiko.AuthenticationException(
-                "Router does not permit passwordless bootstrap authentication."
-            ) from exc
 
-        if not transport.is_authenticated():
-            raise paramiko.AuthenticationException(
-                "Passwordless bootstrap authentication failed."
-            )
+            if not transport.is_authenticated():
+                raise paramiko.AuthenticationException(
+                    "SSH none authentication failed."
+                )
 
-    def _authenticate_with_password(
-        self,
-        client: paramiko.SSHClient,
-        password: str,
-    ) -> None:
-        """Authenticate using a non-empty password."""
+            # SSHClient normally owns the transport created by
+            # SSHClient.connect(). Here we created the transport
+            # explicitly because Paramiko's password="" path does not
+            # perform SSH none authentication.
+            client._transport = transport
 
-        transport = client.get_transport()
+            return client
 
-        if transport is None:
-            raise paramiko.SSHException(
-                "SSH transport is not available after connection."
-            )
-
-        try:
-            transport.auth_password(
-                username=self.username,
-                password=password,
-            )
-        except paramiko.AuthenticationException:
+        except Exception:
+            transport.close()
             raise
 
-        if not transport.is_authenticated():
-            raise paramiko.AuthenticationException(
-                "Password authentication failed."
+    def _connect_with_password(
+        self,
+        password: str,
+    ) -> paramiko.SSHClient:
+        """Connect using normal SSH password authentication."""
+
+        client = self._create_client()
+
+        try:
+            client.connect(
+                hostname=self.candidate.address,
+                port=self.candidate.ssh_port,
+                username=self.username,
+                password=password,
+                timeout=self.timeout,
+                allow_agent=False,
+                look_for_keys=False,
             )
 
-    def _create_client(self) -> paramiko.SSHClient:
+            return client
+
+        except Exception:
+            client.close()
+            raise
+
+    @staticmethod
+    def _create_client() -> paramiko.SSHClient:
         """Create an SSH client for bootstrap communication."""
 
         client = paramiko.SSHClient()
@@ -157,18 +152,5 @@ class RouterBootstrap:
         # the permanent SSH connection. The permanent connection will
         # require an explicitly trusted host key.
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        # Establish the transport first. Authentication is performed
-        # explicitly so that fresh OpenWrt routers can use SSH 'none'
-        # authentication for a blank root password.
-        client.connect(
-            hostname=self.candidate.address,
-            port=self.candidate.ssh_port,
-            username=None,
-            password=None,
-            timeout=self.timeout,
-            allow_agent=False,
-            look_for_keys=False,
-        )
 
         return client
