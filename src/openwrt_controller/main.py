@@ -1,8 +1,3 @@
-#from . import __version__
-
-#def main():
-#    print(f"OpenWrt Pi Controller {__version__}")
-
 from .app import create_app
 
 app = create_app()
