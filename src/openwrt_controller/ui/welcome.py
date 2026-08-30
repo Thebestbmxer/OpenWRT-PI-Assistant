@@ -10,7 +10,7 @@ def register_routes(app, provision_router):
 @app.route("/")
 def index():
     return render_template("welcome.html")
-
+'''
 @app.get("/api/router/discover")
 def discover_router_endpoint():
     """Discover an OpenWrt router without modifying it."""
@@ -44,7 +44,7 @@ def discover_router_endpoint():
                 "error": str(exc),
             }
         ), 404
-
+    '''
 @app.post("/api/router/provision")
 def provision_router_endpoint():
     """Install and verify the controller SSH key."""
