@@ -3,7 +3,7 @@ from flash import Flask
 def register_routes(app: Flask) -> None:
     """Register web UI routes on the Flask application."""
 
-@app.route("/")
+    @app.route("/")
     def index():
         return render_template_string(
             """
