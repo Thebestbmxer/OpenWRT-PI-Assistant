@@ -32,7 +32,7 @@ class RouterKeyInstaller:
 
         if not public_key:
             raise ValueError("SSH public key cannot be empty.")
-
+        '''
         command = (
             f"mkdir -p {self.SSH_DIRECTORY} && "
             f"chmod 700 {self.SSH_DIRECTORY} && "
@@ -41,11 +41,12 @@ class RouterKeyInstaller:
             f"grep -Fqx '{public_key}' {self.AUTHORIZED_KEYS_PATH} || "
             f"echo '{public_key}' >> {self.AUTHORIZED_KEYS_PATH}"
         )
+        '''
         command = (
             #Coppy keys to dropbear directory
             f"mkdir -p {self.DROPBEAR_DIRECTORY} && "
             f"chmod 700 {self.DROPBEAR_DIRECTORY} && "
-            f"touch {self.DROPBEAR_DIRECTORY} && "
+            f"touch {self.DROPBEAR_KEYS_PATH} && "
             f"chmod 600 {self.DROPBEAR_KEYS_PATH} && "
             f"grep -Fqx '{public_key}' {self.DROPBEAR_KEYS_PATH} || "
             f"echo '{public_key}' >> {self.DROPBEAR_KEYS_PATH}"
