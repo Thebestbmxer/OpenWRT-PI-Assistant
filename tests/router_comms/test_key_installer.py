@@ -75,8 +75,11 @@ def test_install_command_creates_ssh_directory_and_authorized_keys(
 
     command = client.exec_command.call_args.args[0]
 
-    assert "mkdir -p ~/.ssh" in command
-    assert "~/.ssh/authorized_keys" in command
+    #assert "mkdir -p ~/.ssh" in command
+    #assert "~/.ssh/authorized_keys" in command
+    
+    assert "mkdir -p /etc/dropbear" in command
+    assert "/etc/dropbear/authorized_keys" in command
 
 
 def test_install_command_contains_public_key(
