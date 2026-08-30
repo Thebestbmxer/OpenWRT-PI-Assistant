@@ -5,7 +5,7 @@ version = "0.0.2"
 from flask import Flask
 
 def register_ui_context(app: Flask) -> None:
-"""Register values available to all UI templates."""
+    """Register values available to all UI templates."""
 
 @app.context_processor
 def inject_ui_version():
