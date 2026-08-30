@@ -131,7 +131,8 @@ def test_install_sets_ssh_directory_permissions(
 
     command = client.exec_command.call_args.args[0]
 
-    assert "chmod 700 ~/.ssh" in command
+    #assert "chmod 700 ~/.ssh" in command
+    assert "chmod 700 /etc/dropbear" in command
 
 
 def test_install_sets_authorized_keys_permissions(
@@ -144,7 +145,8 @@ def test_install_sets_authorized_keys_permissions(
 
     command = client.exec_command.call_args.args[0]
 
-    assert "chmod 600 ~/.ssh/authorized_keys" in command
+    #assert "chmod 600 ~/.ssh/authorized_keys" in command
+    assert "chmod 600 /etc/dropbear/authorized_keys" in command
 
 
 def test_install_requires_authenticated_client(
