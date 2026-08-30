@@ -31,7 +31,7 @@ class Config:
     
     @classmethod
     def get_ssh_key_directory(cls):
-        return cls.get_data_dir() / ".ssh"
+        return cls.get_ssh_data_dir()# / ".ssh"
     
     @classmethod
     def get_ssh_private_key_path(cls):
