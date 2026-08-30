@@ -40,7 +40,8 @@ class RouterKeyInstaller:
             f"chmod 600 {self.AUTHORIZED_KEYS_PATH} && "
             f"grep -Fqx '{public_key}' {self.AUTHORIZED_KEYS_PATH} || "
             f"echo '{public_key}' >> {self.AUTHORIZED_KEYS_PATH}"
-
+        )
+        command2 = (
             #Coppy keys to dropbear directory
             f"mkdir -p {self.DROPBEAR_DIRECTORY} && "
             f"chmod 700 {self.DROPBEAR_DIRECTORY} && "
@@ -52,6 +53,27 @@ class RouterKeyInstaller:
 
         try:
             stdin, stdout, stderr = self.client.exec_command(command)
+
+            try:
+                exit_status = stdout.channel.recv_exit_status()
+
+                error = stderr.read().decode(
+                    "utf-8",
+                    errors="replace",
+                )
+
+                if exit_status != 0:
+                    raise RuntimeError(
+                        f"Failed to install SSH public key: {error.strip()}"
+                    )
+
+            finally:
+                stdin.close()
+                stdout.close()
+                stderr.close()
+
+        try:
+            stdin, stdout, stderr = self.client.exec_command(command2)
 
             try:
                 exit_status = stdout.channel.recv_exit_status()
