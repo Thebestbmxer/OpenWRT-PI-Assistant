@@ -1,4 +1,4 @@
-from flash import Flask
+from flask import Flask
 
 def register_routes(app: Flask) -> None:
     """Register web UI routes on the Flask application."""
