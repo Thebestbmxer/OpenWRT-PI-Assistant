@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}OpenWrt Pi Controller{% endblock %}
+
+{% block content %}
+<h1>OpenWrt Pi Controller</h1>
+
+<button id="provision-button">
+    Install Router SSH Key
+</button>
+
+<div id="status"></div>
+
+<script>const button = document.getElementById("provision-button");
+const status = document.getElementById("status");
+
+button.addEventListener("click", async () => {
+    button.disabled = true;
+    status.textContent =
+        "Discovering router and installing SSH key...";
+
+    try {
+        const response = await fetch(
+            "/api/router/provision",
+            {
+                method: "POST"
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.error || "Provisioning failed."
+            );
+        }
+
+        status.textContent =
+            "Success. Router discovered at " +
+            result.address +
+            ":" +
+            result.ssh_port;
+
+    } catch (error) {
+        status.textContent = "Error: " + error.message;
+
+    } finally {
+        button.disabled = false;
+    }
+});</script>
+{% endblock %}
