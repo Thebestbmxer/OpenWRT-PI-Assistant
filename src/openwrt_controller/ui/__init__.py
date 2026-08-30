@@ -1,23 +1,19 @@
 """Web UI for the OpenWrt Pi Controller."""
 
-version = "0.0.2"
+__version__ = "0.1"
 
 from flask import Flask
+
+from .home import register_routes
+
 
 def register_ui_context(app: Flask) -> None:
     """Register values available to all UI templates."""
 
     @app.context_processor
-    def inject_ui_version():
+    def inject_ui_context() -> dict[str, str]:
+        """Provide common UI values to templates."""
+
         return {
             "ui_version": __version__,
         }
-
-
-    from .welcome import register_routes
-
-    all = [
-        "register_routes",
-        "register_ui_context",
-        "version",
-    ]
