@@ -55,7 +55,7 @@ class RouterKeyInstaller:
             stdin, stdout, stderr = self.client.exec_command(command2)
 
             try:
-                #exit_status = stdout.channel.recv_exit_status()
+                exit_status = stdout.channel.recv_exit_status()
 
                 #error = stderr.read().decode(
                 #    "utf-8",
