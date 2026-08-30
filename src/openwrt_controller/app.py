@@ -8,6 +8,7 @@ from .logging_config import configure_logging
 from .router_comms.factory import create_router_provisioner
 from .ui import register_routes
 
+
 def create_app(config_class=Config, provision_router=None):
     """Create and configure the Flask application."""
 
@@ -22,7 +23,7 @@ def create_app(config_class=Config, provision_router=None):
 
     initialize_database(config_class)
 
-    if provision_router is None:
+    if provision_router is None and config_class is Config:
         provisioner = create_router_provisioner(config_class)
         provision_router = provisioner.provision
 
