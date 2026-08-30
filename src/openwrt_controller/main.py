@@ -55,7 +55,7 @@ def provision_router() -> RouterCandidate:
     #    ssh_port=Config.OPENWRT_SSH_PORT,
     #)
 
-    return provisioner.provision(candidate)
+    return provisioner.provision()
 
 
 def main():
