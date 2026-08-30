@@ -17,7 +17,7 @@ def inject_ui_version():
 from .welcome import register_routes
 
 all = [
-"register_routes",
-"register_ui_context",
-"version",
+    "register_routes",
+    "register_ui_context",
+    "version",
 ]
