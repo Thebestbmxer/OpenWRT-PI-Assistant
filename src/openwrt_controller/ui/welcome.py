@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 def register_routes(app, provision_router):
     """Register the router provisioning welcome page."""
 
-@app.route("/")
-def index():
-    return render_template("welcome.html")
+#@app.route("/")
+#def index():
+#    return render_template("welcome.html")
 
 @app.get("/api/router/discover")
 def discover_router_endpoint():
