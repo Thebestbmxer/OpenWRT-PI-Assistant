@@ -33,21 +33,21 @@ discovery = RouterDiscovery(
     timeout=config_class.OPENWRT_SSH_TIMEOUT,
 )
 
-    return RouterProvisioner(
-        key_manager=key_manager,
-        discovery=discovery,
-        bootstrap_factory=lambda candidate: RouterBootstrap(
-            candidate=candidate,
+return RouterProvisioner(
+    key_manager=key_manager,
+    discovery=discovery,
+    bootstrap_factory=lambda candidate: RouterBootstrap(
+        candidate=candidate,
+        username=config_class.OPENWRT_SSH_USER,
+        timeout=config_class.OPENWRT_SSH_TIMEOUT,
+    ),
+    installer_factory=lambda client: RouterKeyInstaller(client),
+    connection_factory=lambda candidate, key_pair: RouterConnection(
+        candidate=candidate,
+        key_pair=key_pair,
+        config=RouterConnectionConfig(
             username=config_class.OPENWRT_SSH_USER,
             timeout=config_class.OPENWRT_SSH_TIMEOUT,
         ),
-        installer_factory=lambda client: RouterKeyInstaller(client),
-        connection_factory=lambda candidate, key_pair: RouterConnection(
-            candidate=candidate,
-            key_pair=key_pair,
-            config=RouterConnectionConfig(
-                username=config_class.OPENWRT_SSH_USER,
-                timeout=config_class.OPENWRT_SSH_TIMEOUT,
-            ),
-        ),
-    )
+    ),
+)
