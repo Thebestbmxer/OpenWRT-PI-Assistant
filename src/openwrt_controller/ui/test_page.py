@@ -1,6 +1,9 @@
 
+import logging
 
 from flask import Flask, jsonify, render_template_string
+
+logger = logging.getLogger(__name__)
 
 def register_routes(app: Flask) -> None:
     """Register web UI routes on the Flask application."""
