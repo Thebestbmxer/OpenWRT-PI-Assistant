@@ -24,3 +24,9 @@ openwrt-controller = "openwrt_controller.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+openwrt_controller = [
+    "ui/templates/*.html",
+	"ui/static/**/*",
+]
