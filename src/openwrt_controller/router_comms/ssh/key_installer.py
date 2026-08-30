@@ -8,7 +8,9 @@ class RouterKeyInstaller:
     """Install a controller public key into OpenWrt authorized_keys."""
 
     AUTHORIZED_KEYS_PATH = "~/.ssh/authorized_keys"
+    DROPBEAR_KEYS_PATH = "/etc/dropbear/authorized_keys"
     SSH_DIRECTORY = "~/.ssh"
+    DROPBEAR_DIRECTORY = "/etc/dropbear"
 
     def __init__(self, client: paramiko.SSHClient) -> None:
         self.client = client
@@ -39,6 +41,13 @@ class RouterKeyInstaller:
             f"grep -Fqx '{public_key}' "
             f"{self.AUTHORIZED_KEYS_PATH} || "
             f"echo '{public_key}' >> {self.AUTHORIZED_KEYS_PATH}"
+
+            #Coppy keys to dropbear directory
+            f"chmod 700 {self.DROPBEAR_DIRECTORY} && "
+            f"touch {self.DROPBEAR_DIRECTORY} && "
+            f"chmod 600 {self.DROPBEAR_KEYS_PATH} && "
+            f"grep -Fqx {public_key} {self.DROPBEAR_KEYS_PATH} || "
+            f"echo '{public_key}' >> {self.DROPBEAR_KEYS_PATH}"
         )
 
         try:
