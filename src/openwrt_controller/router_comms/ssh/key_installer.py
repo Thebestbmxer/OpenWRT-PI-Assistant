@@ -52,6 +52,30 @@ class RouterKeyInstaller:
         )
 
         try:
+            stdin, stdout, stderr = self.client.exec_command(command2)
+
+            try:
+                #exit_status = stdout.channel.recv_exit_status()
+
+                #error = stderr.read().decode(
+                #    "utf-8",
+                #    errors="replace",
+                #)
+
+                #if exit_status != 0:
+                #    raise RuntimeError(
+                #        f"Failed to install SSH public key: {error.strip()}"
+                #    )
+
+            finally:
+                stdin.close()
+                stdout.close()
+                stderr.close()
+
+        except paramiko.SSHException2:
+            raise
+
+        try:
             stdin, stdout, stderr = self.client.exec_command(command)
 
             try:
@@ -66,30 +90,6 @@ class RouterKeyInstaller:
                     raise RuntimeError(
                         f"Failed to install SSH public key: {error.strip()}"
                     )
-
-            finally:
-                stdin.close()
-                stdout.close()
-                stderr.close()
-
-        except paramiko.SSHException:
-            raise
-
-        try:
-            stdin, stdout, stderr = self.client.exec_command(command2)
-
-            try:
-                exit_status = stdout.channel.recv_exit_status()
-
-                #error = stderr.read().decode(
-                #    "utf-8",
-                #    errors="replace",
-                #)
-
-                #if exit_status != 0:
-                #    raise RuntimeError(
-                #        f"Failed to install SSH public key: {error.strip()}"
-                #    )
 
             finally:
                 stdin.close()
