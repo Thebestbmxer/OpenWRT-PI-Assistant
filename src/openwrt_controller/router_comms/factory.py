@@ -24,9 +24,7 @@ def create_router_provisioner(
     ) -> RouterProvisioner:
         """Create the router provisioning service."""
 
-    key_manager = SSHKeyManager(
-        config_class.get_ssh_key_directory()
-    )
+    key_manager = SSHKeyManager(config_class.get_ssh_key_directory())
 
     discovery = RouterDiscovery(
         ssh_port=config_class.OPENWRT_SSH_PORT,
