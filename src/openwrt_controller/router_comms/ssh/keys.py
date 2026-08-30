@@ -5,6 +5,7 @@ from pathlib import Path
 
 import paramiko
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 @dataclass(frozen=True)
@@ -47,7 +48,10 @@ class SSHKeyManager:
                 f"SSH key pair already exists: {private_key_path}"
             )
 
-        private_key = paramiko.RSAKey.generate(bits=2048)
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
 
         private_key_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -55,10 +59,12 @@ class SSHKeyManager:
             encryption_algorithm=serialization.NoEncryption(),
         )
 
-        public_key = (
-            f"{private_key.get_name()} "
-            f"{private_key.get_base64()}"
+        public_key_bytes = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH,
         )
+
+        public_key = public_key_bytes.decode("utf-8")
 
         private_key_path.write_bytes(private_key_bytes)
         private_key_path.chmod(0o600)
