@@ -4,8 +4,7 @@ __version__ = "0.1"
 
 from flask import Flask
 
-from .home import register_routes
-
+from .welcome import register_routes
 
 def register_ui_context(app: Flask) -> None:
     """Register values available to all UI templates."""
