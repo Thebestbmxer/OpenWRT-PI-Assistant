@@ -22,7 +22,6 @@ def create_app(config_class=Config, provision_router=None):
 
     initialize_database(config_class)
 
-    if provision_router is not None:
-        register_routes(app, provision_router)
+    register_routes(app, provision_router)
 
     return app

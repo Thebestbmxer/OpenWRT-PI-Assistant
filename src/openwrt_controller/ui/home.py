@@ -100,6 +100,11 @@ def register_routes(app, provision_router):
             "Router provisioning requested from web interface"
         )
 
+        if provision_router is None:
+            return jsonify(
+                {"error": "Router provisioning is not configured."}
+            ), 503
+
         try:
             candidate = provision_router()
 
