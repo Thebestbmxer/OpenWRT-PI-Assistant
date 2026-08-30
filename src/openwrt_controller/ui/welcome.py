@@ -2,7 +2,7 @@ import logging
 
 from flask import jsonify, render_template
 
-logger = logging.getLogger(name)
+logger = logging.getLogger(__name__)
 
 def register_routes(app, provision_router):
     """Register the router provisioning welcome page."""
