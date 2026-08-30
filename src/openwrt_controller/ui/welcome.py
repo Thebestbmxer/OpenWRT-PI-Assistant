@@ -5,7 +5,7 @@ from flask import jsonify, render_template
 logger = logging.getLogger(name)
 
 def register_routes(app, provision_router):
-"""Register the router provisioning welcome page."""
+    """Register the router provisioning welcome page."""
 
 @app.route("/")
 def index():
