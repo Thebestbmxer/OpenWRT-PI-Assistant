@@ -18,7 +18,10 @@ def create_app(config_class=Config, provision_router=None):
     logger = logging.getLogger(__name__)
     logger.info("Starting OpenWrt Pi Controller")
 
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder="ui/templates",
+    )
 
     app.config.from_object(config_class)
 
