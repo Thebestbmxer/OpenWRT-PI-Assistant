@@ -72,7 +72,7 @@ class RouterKeyInstaller:
                 stdout.close()
                 stderr.close()
 
-        except paramiko.SSHException2:
+        except paramiko.SSHException:
             raise
 
         try:
