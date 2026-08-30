@@ -2,18 +2,21 @@
 
 {% block title %}Welcome - OpenWrt Pi Controller{% endblock %}
 
+{% block head %}
+
+<section class="welcome-header">
+    <h1>OpenWrt Pi Controller</h1>
+
+    <p>
+        Welcome. The controller must establish secure SSH access
+        to an OpenWrt router before the application can continue.
+    </p>
+</section>
+{% endblock %}
+
 {% block content %}
 
 <div class="welcome-page">
-    <section class="welcome-header">
-        <h1>OpenWrt Pi Controller</h1>
-
-        <p>
-            Welcome. The controller must establish secure SSH access
-            to an OpenWrt router before the application can continue.
-        </p>
-    </section>
-
     <section class="router-discovery">
 
         <h2>Router</h2>

@@ -1,14 +1,57 @@
-<div class="ui-version">
-    v{{ ui_version }}
-</div>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}OpenWrt Pi Controller{% endblock %}
+    </title>
 
-<style>
-    .ui-version {
-        position: fixed;
-        top: 10px;
-        right: 14px;
-        font-size: 12px;
-        color: #888;
-        z-index: 1000;
-    }
-</style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        .page {
+            min-height: 100vh;
+        }
+
+        .ui-version {
+            position: fixed;
+            top: 10px;
+            right: 14px;
+            font-size: 12px;
+            color: #888;
+            z-index: 1000;
+        }
+    </style>
+
+    {% block head %}{% endblock %}
+
+</head>
+<body>
+    <div class="ui-version">
+        v{{ ui_version }}
+    </div>
+
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>
