@@ -6,7 +6,8 @@ from .config import Config
 from .database import initialize_database
 from .logging_config import configure_logging
 from .router_comms.factory import create_router_provisioner
-from .ui import register_routes
+from .ui import register_routes, register_ui_context
+
 
 
 def create_app(config_class=Config, provision_router=None):
@@ -28,5 +29,7 @@ def create_app(config_class=Config, provision_router=None):
         provision_router = provisioner.provision
 
     register_routes(app, provision_router)
+    register_ui_context(app)
+
 
     return app
