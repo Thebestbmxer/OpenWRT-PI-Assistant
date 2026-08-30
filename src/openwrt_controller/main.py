@@ -1,9 +1,7 @@
 from .app import create_app
 
 
-app = create_app(
-    provision_router=provision_router,
-)
+app = create_app()
 
 
 def main():
