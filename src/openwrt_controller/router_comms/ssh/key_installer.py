@@ -72,6 +72,9 @@ class RouterKeyInstaller:
                 stdout.close()
                 stderr.close()
 
+        except paramiko.SSHException:
+            raise
+
         try:
             stdin, stdout, stderr = self.client.exec_command(command2)
 
