@@ -1,4 +1,4 @@
-
+'''
 import logging
 
 from flask import Flask, jsonify, render_template_string
@@ -127,3 +127,4 @@ def register_routes(app: Flask) -> None:
                     "error": str(exc),
                 }
             ), 500
+        '''
