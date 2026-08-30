@@ -62,7 +62,7 @@ class RouterProvisioner:
         If ``candidate`` is not supplied, discovery is performed.
 
         The controller key is loaded when it already exists. If no complete
-        key pair exists, a new Ed25519 key pair is generated.
+        key pair exists, a new RSA key pair is generated.
 
         Bootstrap communication is used only to install the controller's
         public key. The bootstrap connection is always closed before the

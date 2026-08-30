@@ -31,7 +31,7 @@ def key_pair(tmp_path: Path) -> SSHKeyPair:
     return SSHKeyPair(
         private_key_path=tmp_path / "controller",
         public_key_path=tmp_path / "controller.pub",
-        public_key="ssh-ed25519 AAAATEST",
+        public_key="ssh-rsa AAAATEST",
     )
 
 

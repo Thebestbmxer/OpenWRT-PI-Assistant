@@ -19,14 +19,14 @@ def key_pair(tmp_path: Path) -> SSHKeyPair:
 
     private_key.write_text("PRIVATE KEY", encoding="utf-8")
     public_key.write_text(
-        "ssh-ed25519 AAAATEST controller\n",
+        "ssh-rsa AAAATEST controller\n",
         encoding="utf-8",
     )
 
     return SSHKeyPair(
         private_key_path=private_key,
         public_key_path=public_key,
-        public_key="ssh-ed25519 AAAATEST controller",
+        public_key="ssh-rsa AAAATEST controller",
     )
 
 
