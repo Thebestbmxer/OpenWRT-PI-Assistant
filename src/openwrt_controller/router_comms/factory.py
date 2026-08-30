@@ -22,7 +22,7 @@ from openwrt_controller.router_comms.ssh.keys import SSHKeyManager
 def create_router_provisioner(
     config_class: type[Config] = Config,
 ) -> RouterProvisioner:
-"""Create the router provisioning service."""
+    """Create the router provisioning service."""
 
 key_manager = SSHKeyManager(
     config_class.get_ssh_key_directory()
