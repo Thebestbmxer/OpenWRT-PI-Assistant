@@ -10,7 +10,8 @@ from openwrt_controller.router_comms.ssh.keys import (
     SSHKeyPair,
 )
 
-def test_generates_ed25519_key_pair(tmp_path: Path):
+
+def test_generates_rsa_key_pair(tmp_path: Path):
     manager = SSHKeyManager(tmp_path)
 
     key_pair = manager.generate_key_pair()
@@ -22,7 +23,7 @@ def test_generates_ed25519_key_pair(tmp_path: Path):
     assert key_pair.private_key_path.exists()
     assert key_pair.public_key_path.exists()
 
-    assert key_pair.public_key.startswith("ssh-ed25519 ")
+    assert key_pair.public_key.startswith("ssh-rsa ")
 
 
 def test_private_key_has_restrictive_permissions(tmp_path: Path):
@@ -47,16 +48,16 @@ def test_public_key_has_readable_permissions(tmp_path: Path):
 
 def test_generated_private_key_can_be_loaded_by_paramiko(
     tmp_path: Path,
-    ):
+):
     manager = SSHKeyManager(tmp_path)
 
     key_pair = manager.generate_key_pair()
 
-    key = paramiko.Ed25519Key.from_private_key_file(
+    key = paramiko.RSAKey.from_private_key_file(
         str(key_pair.private_key_path)
     )
 
-    assert key.get_name() == "ssh-ed25519"
+    assert key.get_name() == "ssh-rsa"
     assert key.get_base64() in key_pair.public_key
 
 
@@ -85,13 +86,13 @@ def test_existing_key_pair_is_not_overwritten(tmp_path: Path):
 
 def test_load_fails_when_public_key_does_not_match(
     tmp_path: Path,
-    ):
+):
     manager = SSHKeyManager(tmp_path)
 
     manager.generate_key_pair()
 
     (tmp_path / "controller.pub").write_text(
-        "ssh-ed25519 invalid-key\n",
+        "ssh-rsa invalid-key\n",
         encoding="utf-8",
     )
 

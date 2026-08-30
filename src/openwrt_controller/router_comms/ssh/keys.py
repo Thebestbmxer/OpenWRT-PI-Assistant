@@ -1,12 +1,10 @@
 """Management of the controller's SSH identity."""
 
-
 from dataclasses import dataclass
 from pathlib import Path
 
 import paramiko
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
 @dataclass(frozen=True)
@@ -34,7 +32,7 @@ class SSHKeyManager:
         self,
         name: str = "controller",
     ) -> SSHKeyPair:
-        """Generate an Ed25519 key pair.
+        """Generate an RSA key pair.
 
         An existing key pair is never silently overwritten.
         """
@@ -49,7 +47,7 @@ class SSHKeyManager:
                 f"SSH key pair already exists: {private_key_path}"
             )
 
-        private_key = ed25519.Ed25519PrivateKey.generate()
+        private_key = paramiko.RSAKey.generate(bits=2048)
 
         private_key_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -57,12 +55,10 @@ class SSHKeyManager:
             encryption_algorithm=serialization.NoEncryption(),
         )
 
-        public_key_bytes = private_key.public_key().public_bytes(
-            encoding=serialization.Encoding.OpenSSH,
-            format=serialization.PublicFormat.OpenSSH,
+        public_key = (
+            f"{private_key.get_name()} "
+            f"{private_key.get_base64()}"
         )
-
-        public_key = public_key_bytes.decode("utf-8")
 
         private_key_path.write_bytes(private_key_bytes)
         private_key_path.chmod(0o600)
@@ -98,7 +94,7 @@ class SSHKeyManager:
                 f"SSH public key does not exist: {public_key_path}"
             )
 
-        key = paramiko.Ed25519Key.from_private_key_file(
+        key = paramiko.RSAKey.from_private_key_file(
             str(private_key_path)
         )
 
