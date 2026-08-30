@@ -25,7 +25,7 @@ def test_index():
 
     response = client.get("/")
 
-    assert response.status_code == 500
+    assert response.status_code == 200
     #assert response.data == b"OpenWrt Pi Controller"
 
 def test_create_app_initializes_database(tmp_path):
