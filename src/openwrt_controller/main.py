@@ -50,10 +50,10 @@ def provision_router() -> RouterCandidate:
         connection_factory=connection_factory,
     )
 
-    candidate = RouterCandidate(
-        address=Config.OPENWRT_HOST,
-        ssh_port=Config.OPENWRT_SSH_PORT,
-    )
+    #candidate = RouterCandidate(
+    #    address=Config.OPENWRT_HOST,
+    #    ssh_port=Config.OPENWRT_SSH_PORT,
+    #)
 
     return provisioner.provision(candidate)
 
