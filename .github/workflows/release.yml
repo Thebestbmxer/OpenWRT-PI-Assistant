@@ -49,7 +49,7 @@ jobs:
       - name: Read project version
         id: version
         run: |
-          VERSION=$(python -c 'from openwrt_controller import __version__; print(__version__)')
+          VERSION=$(python -c 'from router_controller import __version__; print(__version__)')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Project version: $VERSION"
 
@@ -76,7 +76,7 @@ jobs:
 
       - name: Verify Debian package
         run: |
-          PACKAGE="../openwrt-pi-controller_${{ steps.version.outputs.version }}_all.deb"
+          PACKAGE="../router-pi-controller_${{ steps.version.outputs.version }}_all.deb"
 
           if [ ! -f "$PACKAGE" ]; then
             echo "ERROR: Expected package was not created:"
@@ -89,12 +89,12 @@ jobs:
       - name: Upload Debian package
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt-pi-controller-${{ steps.version.outputs.version }}
-          path: ../openwrt-pi-controller_${{ steps.version.outputs.version }}_all.deb
+          name: router-controller-${{ steps.version.outputs.version }}
+          path: ../router-pi-controller_${{ steps.version.outputs.version }}_all.deb
           if-no-files-found: error
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ../openwrt-pi-controller_${{ steps.version.outputs.version }}_all.deb
+          files: ../router-controller_${{ steps.version.outputs.version }}_all.deb
           generate_release_notes: true
