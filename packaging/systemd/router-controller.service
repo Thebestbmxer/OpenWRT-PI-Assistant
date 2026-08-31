@@ -9,7 +9,7 @@ Type=simple
 User=router-controller
 Group=router-controller
 
-ExecStart=/usr/bin/router_controller
+ExecStart=/usr/bin/router-controller
 
 Restart=on-failure
 RestartSec=5
