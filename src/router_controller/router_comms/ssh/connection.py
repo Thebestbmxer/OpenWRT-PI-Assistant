@@ -171,4 +171,5 @@ class RouterConnection:
             digest
         ).decode("ascii").rstrip("=")
 
-        return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"
+        #return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"
+        return f"SHA256:{fingerprint}"
