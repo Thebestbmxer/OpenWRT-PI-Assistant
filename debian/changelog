@@ -1,3 +1,10 @@
+router-pi-controller (0.4.0) unstable; urgency=medium
+
+  * Expanding descovery to include MAC
+  * Added Router profil to begin saving current router data
+
+ -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Mon, 31 Aug 2026 08:36:00 +0100
+
 router-pi-controller (0.3.8) stable; urgency=medium
 
   * Project Freese

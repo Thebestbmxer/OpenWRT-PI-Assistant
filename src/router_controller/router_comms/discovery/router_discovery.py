@@ -68,6 +68,8 @@ class RouterCandidate:
 
     address: str
     ssh_port: int = 22
+    mac_address: str | None = None
+    interface: str | None = None
 
 
 class RouterDiscovery:
