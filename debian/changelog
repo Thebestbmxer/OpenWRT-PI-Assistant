@@ -3,7 +3,7 @@ openwrt-pi-controller (0.3.6) unstable; urgency=medium
   * SSH installs keys
   * UI: ui folder moves with flask logic
 
- -- OpenWrt Pi Controller Project
+ -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Sat, 29 Aug 2026 00:00:00 +0000
 
 openwrt-pi-controller (0.3.5) unstable; urgency=medium
 
