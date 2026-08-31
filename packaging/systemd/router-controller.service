@@ -11,7 +11,7 @@ Group=router-controller
 
 ExecStart=/usr/bin/router-controller
 
-Restart=on-failure
+Restart=always
 RestartSec=5
 
 [Install]
