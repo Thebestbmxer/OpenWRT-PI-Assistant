@@ -25,7 +25,7 @@ def register_routes(app, provision_router):
             ), 503
 
         try:
-            candidate = provision_router.discovery.discover()
+            candidate = provision_router() #.discovery.discover()
 
             return jsonify(
                 {
