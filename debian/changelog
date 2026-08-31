@@ -1,4 +1,4 @@
-openwrt-pi-controller (0.3.6) unstable; urgency=medium
+router-pi-controller (0.3.6) unstable; urgency=medium
 
   * SSH installs keys
   * UI: ui folder moves with flask logic
