@@ -237,3 +237,37 @@ def test_connected_reflects_inactive_transport(
 
         assert connection.connected is False
 
+def test_host_key_fingerprint(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+    transport = MagicMock()
+
+    transport.is_active.return_value = True
+
+    host_key = paramiko.RSAKey.generate(2048)
+    transport.get_remote_server_key.return_value = host_key
+
+    client.get_transport.return_value = transport
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(candidate, key_pair)
+
+        connection.connect()
+
+        fingerprint = connection.host_key_fingerprint
+
+    assert fingerprint is not None
+    assert fingerprint.startswith("SHA256:")
+
+def test_host_key_fingerprint_requires_connection(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    connection = RouterConnection(candidate, key_pair)
+
+    assert connection.host_key_fingerprint is None

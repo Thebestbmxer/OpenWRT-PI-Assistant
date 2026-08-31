@@ -24,6 +24,7 @@ class RouterStateRepository:
             json.dumps(
                 asdict(state),
                 indent=2,
+                sort_keys=True,
             ),
             encoding="utf-8",
         )

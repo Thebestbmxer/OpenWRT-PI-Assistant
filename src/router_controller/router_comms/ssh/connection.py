@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import paramiko
+import hashlib
 
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
@@ -134,27 +135,40 @@ class RouterConnection:
         self.close()
 
     @property
-    def host_key_fingerprint(self) -> str:
+    def host_key_fingerprint(self) -> str | None:
         """Return the SHA256 fingerprint of the connected router's host key."""
 
         if self._client is None:
-            raise RuntimeError(
-                "Router SSH connection has not been established."
-            )
+            return None
+            #raise RuntimeError(
+            #    "Router SSH connection has not been established."
+            #)
 
         transport = self._client.get_transport()
 
         if transport is None or not transport.is_active():
-            raise RuntimeError(
-                "Router SSH connection is not active."
-            )
+            return None
+            #raise RuntimeError(
+            #    "Router SSH connection is not active."
+            #)
 
         host_key = transport.get_remote_server_key()
 
-        fingerprint = host_key.get_fingerprint()
+        if host_key is None:
+            return None
+
+        digest = hashlib.sha256(
+            host_key.asbytes()
+        ).digest()
+
+        #fingerprint = host_key.get_fingerprint()
 
         import base64
 
-        encoded = base64.b64encode(fingerprint).decode("ascii")
+        #encoded = base64.b64encode(fingerprint).decode("ascii")
+
+        fingerprint = base64.b64encode(
+            digest
+        ).decode("ascii").rstrip("=")
 
         return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"
