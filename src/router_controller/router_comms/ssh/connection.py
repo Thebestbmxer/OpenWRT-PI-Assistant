@@ -132,3 +132,29 @@ class RouterConnection:
         traceback: object,
     ) -> None:
         self.close()
+
+    @property
+    def host_key_fingerprint(self) -> str:
+        """Return the SHA256 fingerprint of the connected router's host key."""
+
+        if self._client is None:
+            raise RuntimeError(
+                "Router SSH connection has not been established."
+            )
+
+        transport = self._client.get_transport()
+
+        if transport is None or not transport.is_active():
+            raise RuntimeError(
+                "Router SSH connection is not active."
+            )
+
+        host_key = transport.get_remote_server_key()
+
+        fingerprint = host_key.get_fingerprint()
+
+        import base64
+
+        encoded = base64.b64encode(fingerprint).decode("ascii")
+
+        return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"

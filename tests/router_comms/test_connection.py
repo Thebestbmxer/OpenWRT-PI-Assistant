@@ -185,3 +185,55 @@ def test_close_disconnects_client(
 
     client.close.assert_called_once()
     assert connection.connected is False
+
+def test_connect_does_not_reconnect_when_already_connected(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(candidate, key_pair)
+
+        connection.connect()
+        connection.connect()
+
+    client.connect.assert_called_once()
+
+def test_close_is_safe_when_not_connected(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    connection = RouterConnection(candidate, key_pair)
+
+    connection.close()
+
+    assert connection.connected is False
+
+def test_connected_reflects_inactive_transport(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+    transport = MagicMock()
+
+    transport.is_active.return_value = True
+    client.get_transport.return_value = transport
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(candidate, key_pair)
+
+        connection.connect()
+
+        assert connection.connected is True
+
+        transport.is_active.return_value = False
+
+        assert connection.connected is False
+
