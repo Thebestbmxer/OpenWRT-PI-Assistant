@@ -14,6 +14,9 @@ from router_controller.router_comms.discovery.router_discovery import (
     RouterDiscovery,
 )
 from router_controller.router_comms.ssh.connection import RouterConnection
+from router_controller.router_comms.ssh.connection_manager import (
+    RouterConnectionManager,
+)
 from router_controller.router_comms.ssh.key_installer import (
     RouterKeyInstaller,
 )
@@ -104,3 +107,16 @@ class RouterProvisioner:
             return self.key_manager.load_key_pair()
         except FileNotFoundError:
             return self.key_manager.generate_key_pair()
+
+    def create_connection_manager(
+        self,
+        candidate: RouterCandidate,
+        key_pair: SSHKeyPair,
+    ) -> RouterConnectionManager:
+        """Create a connection manager for a provisioned router."""
+
+        return RouterConnectionManager(
+            candidate=candidate,
+            key_pair=key_pair,
+            connection_factory=self.connection_factory,
+        )

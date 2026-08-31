@@ -1,4 +1,6 @@
 from unittest.mock import Mock
+from unittest.mock import MagicMock
+
 
 import pytest
 
@@ -6,6 +8,9 @@ from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
 from router_controller.router_comms.provisioner import RouterProvisioner
+from router_controller.router_comms.ssh.connection_manager import (
+    RouterConnectionManager,
+)
 from router_controller.router_comms.ssh.keys import SSHKeyPair
 
 
@@ -306,3 +311,27 @@ def test_provision_failure_to_connect_is_propagated(
         provisioner.provision(candidate)
 
     connection.close.assert_called_once_with()
+
+def test_create_connection_manager(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    connection_factory = MagicMock()
+
+    provisioner = RouterProvisioner(
+        key_manager=MagicMock(),
+        discovery=MagicMock(),
+        bootstrap_factory=MagicMock(),
+        installer_factory=MagicMock(),
+        connection_factory=connection_factory,
+    )
+
+    manager = provisioner.create_connection_manager(
+        candidate,
+        key_pair,
+    )
+
+    assert isinstance(manager, RouterConnectionManager)
+    assert manager.candidate is candidate
+    assert manager.key_pair is key_pair
+    assert manager.connection_factory is connection_factory
