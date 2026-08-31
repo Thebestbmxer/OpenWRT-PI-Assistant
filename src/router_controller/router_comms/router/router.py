@@ -54,3 +54,21 @@ class Router:
             self.connection_manager is not None
             and self.connection_manager.connected
         )
+
+    @classmethod
+    def from_connection(
+        cls,
+        candidate: RouterCandidate,
+        host_key_fingerprint: str,
+    ) -> "Router":
+        """Create a router from a verified SSH connection."""
+
+        identity = RouterIdentity(
+            mac_address=candidate.mac_address,
+            ssh_host_key_fingerprint=host_key_fingerprint,
+        )
+
+        return cls(
+            identity=identity,
+            candidate=candidate,
+        )

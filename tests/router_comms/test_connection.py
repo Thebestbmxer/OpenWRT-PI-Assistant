@@ -244,10 +244,14 @@ def test_host_key_fingerprint(
     client = MagicMock()
     transport = MagicMock()
 
-    transport.is_active.return_value = True
-
-    host_key = paramiko.RSAKey.generate(2048)
+    host_key = MagicMock()
+    host_key.get_fingerprint.return_value = (
+        b"\xaa\xbb\xcc\xdd"
+    )
+    
+    #host_key = paramiko.RSAKey.generate(2048)
     transport.get_remote_server_key.return_value = host_key
+    transport.is_active.return_value = True
 
     client.get_transport.return_value = transport
 
@@ -261,8 +265,9 @@ def test_host_key_fingerprint(
 
         fingerprint = connection.host_key_fingerprint
 
-    assert fingerprint is not None
-    assert fingerprint.startswith("SHA256:")
+        assert connection.host_key_fingerprint == "aabbccdd"
+    #assert fingerprint is not None
+    #assert fingerprint.startswith("SHA256:")
 
 def test_host_key_fingerprint_requires_connection(
     candidate: RouterCandidate,

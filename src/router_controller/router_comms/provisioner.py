@@ -24,6 +24,8 @@ from router_controller.router_comms.ssh.keys import (
     SSHKeyManager,
     SSHKeyPair,
 )
+from router_controller.router_comms.router.router import Router
+
 
 
 class RouterProvisioner:
@@ -59,7 +61,7 @@ class RouterProvisioner:
     def provision(
         self,
         candidate: RouterCandidate | None = None,
-    ) -> RouterCandidate:
+    ) -> Router:
         """Provision a router and verify key-based SSH authentication.
 
         If ``candidate`` is not supplied, discovery is performed.
@@ -95,10 +97,21 @@ class RouterProvisioner:
                 raise RuntimeError(
                     "Router SSH connection was not established."
                 )
+            fingerprint = connection.host_key_fingerprint
+
+            if fingerprint is None:
+                raise RuntimeError(
+                    "Router SSH host key could not be determined."
+                )
+
+            return Router.from_connection(
+                candidate,
+                fingerprint,
+            )
         finally:
             connection.close()
 
-        return candidate
+        #return candidate
 
     def _load_or_generate_key_pair(self) -> SSHKeyPair:
         """Load the controller key pair or create it when absent."""

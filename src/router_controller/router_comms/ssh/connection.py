@@ -146,7 +146,7 @@ class RouterConnection:
 
         transport = self._client.get_transport()
 
-        if transport is None or not transport.is_active():
+        if transport is None: #or not transport.is_active():
             return None
             #raise RuntimeError(
             #    "Router SSH connection is not active."
@@ -157,6 +157,8 @@ class RouterConnection:
         if host_key is None:
             return None
 
+        return key.get_fingerprint().hex()
+        '''
         digest = hashlib.sha256(
             host_key.asbytes()
         ).digest()
@@ -173,3 +175,4 @@ class RouterConnection:
 
         #return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"
         return f"SHA256:{fingerprint}"
+        '''
