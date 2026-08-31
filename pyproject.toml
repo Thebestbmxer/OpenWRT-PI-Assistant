@@ -20,7 +20,7 @@ test = [
 ]
 
 [project.scripts]
-router_controller = "router_controller.main:main"
+router-controller = "router_controller.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
