@@ -12,4 +12,3 @@ override_dh_auto_install:
 	install -D -m 0644 \
 		packaging/systemd/router-controller.service \
 		debian/router-pi-controller/usr/lib/systemd/system/router-controller.service
-	dh_installdirs var/lib/router-pi-controller
