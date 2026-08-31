@@ -162,6 +162,64 @@
             background: #1565c0;
         }
 </style>
-<script>const statusElement = document.getElementById("router-status"); const informationElement = document.getElementById("router-information"); const addressElement = document.getElementById("router-address"); const portElement = document.getElementById("router-port"); const searchButton = document.getElementById("search-button"); const installButton = document.getElementById("install-button"); function showStatus(message, type = "") { statusElement.textContent = message; statusElement.className = "status-message"; if (type) { statusElement.classList.add(type); } } function showRouter(address, port) { addressElement.textContent = address; portElement.textContent = port; informationElement.classList.remove("hidden"); installButton.disabled = false; } function clearRouter() { addressElement.textContent = "—"; portElement.textContent = "—"; informationElement.classList.add("hidden"); installButton.disabled = true; } async function discoverRouter() { searchButton.disabled = true; installButton.disabled = true; clearRouter(); showStatus("Searching for an OpenWrt router...", "working"); try { const response = await fetch("/api/router/discover", { method: "GET", cache: "no-store" }); const result = await response.json(); if (!response.ok || !result.found) { throw new Error(result.error || "No router was found."); } showRouter(result.address, result.ssh_port); showStatus("Router discovered. You can now install the controller SSH key.", "success"); } catch (error) { clearRouter(); showStatus("Router discovery failed: " + error.message, "error"); } finally { searchButton.disabled = false; } } async function installSSHKey() { searchButton.disabled = true; installButton.disabled = true; showStatus("Connecting to the router, installing the SSH key, " + "and verifying keyed SSH access...", "working"); try { const response = await fetch("/api/router/provision", { method: "POST" }); const result = await response.json(); if (!response.ok || !result.success) { throw new Error(result.error || "SSH key installation failed."); } showRouter(result.address, result.ssh_port); showStatus(result.message, "success"); } catch (error) { showStatus("SSH key installation failed: " + error.message, "error"); installButton.disabled = false; } finally { searchButton.disabled = false; } } searchButton.addEventListener("click", discoverRouter); installButton.addEventListener("click", installSSHKey); // Automatically search when the welcome page loads. discoverRouter();</script>
+<script>
+    const statusElement      = document.getElementById("router-status");
+    const informationElement = document.getElementById("router-information");
+    const addressElement     = document.getElementById("router-address");
+    const portElement        = document.getElementById("router-port");
+    const searchButton       = document.getElementById("search-button");
+    const installButton      = document.getElementById("install-button");
+
+    function showStatus(message, type = "") {
+        statusElement.textContent = message;
+        statusElement.className = "status-message";
+        if (type) { statusElement.classList.add(type); }
+    }
+    function showRouter(address, port) {
+        addressElement.textContent = address;
+        portElement.textContent = port;
+        informationElement.classList.remove("hidden");
+        installButton.disabled = false;
+    }
+    function clearRouter() {
+        addressElement.textContent = "—";
+        portElement.textContent = "—";
+        informationElement.classList.add("hidden");
+        installButton.disabled = true;
+    }
+    async function discoverRouter() {
+        searchButton.disabled = true;
+        installButton.disabled = true;
+        clearRouter();
+        showStatus("Searching for an OpenWrt router...", "working");
+        try {
+            const response = await fetch("/api/router/discover", { method: "GET", cache: "no-store" });
+            const result = await response.json(); if (!response.ok || !result.found) {
+                throw new Error(result.error || "No router was found.");
+            }
+            showRouter(result.address, result.ssh_port);
+            showStatus("Router discovered. You can now install the controller SSH key.", "success");
+        } catch (error) {
+            clearRouter();
+            showStatus("Router discovery failed: " + error.message, "error");
+        } finally { searchButton.disabled = false; }
+    }
+    async function installSSHKey() {
+        searchButton.disabled = true; installButton.disabled = true;
+        showStatus("Connecting to the router, installing the SSH key, " + "and verifying keyed SSH access...", "working");
+        try {
+            const response = await fetch("/api/router/provision", { method: "POST" });
+            const result = await response.json(); if (!response.ok || !result.success) {
+                throw new Error(result.error || "SSH key installation failed.");
+            }
+            showRouter(result.address, result.ssh_port); showStatus(result.message, "success");
+        } catch (error) {
+            showStatus("SSH key installation failed: " + error.message, "error");
+            installButton.disabled = false;
+        } finally { searchButton.disabled = false; }
+    }
+    document.addEventListener("DOMContentLoaded", () => { discoverRouter(); });
+    searchButton.addEventListener("click", discoverRouter);
+    installButton.addEventListener("click", installSSHKey); // Automatically search when the welcome page loads. discoverRouter();</script>
 
 {% endblock %}
