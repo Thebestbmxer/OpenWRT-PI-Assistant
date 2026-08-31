@@ -82,7 +82,7 @@ def test_connect_reuses_active_connection(
     assert second is connection
 
     factory.assert_called_once_with(candidate, key_pair)
-    connection.connect.assert_not_called()
+    connection.connect.assert_called_once()
 
 
 def test_connect_replaces_inactive_connection(
