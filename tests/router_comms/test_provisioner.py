@@ -134,7 +134,8 @@ def test_provision_generates_key_when_missing(
 
     result = provisioner.provision(candidate)
 
-    assert result == candidate
+    assert result.candidate == candidate
+    #assert result == candidate
 
     key_manager.load_key_pair.assert_called_once_with()
     key_manager.generate_key_pair.assert_called_once_with()
@@ -186,7 +187,8 @@ def test_provision_does_not_discover_when_candidate_supplied(
 
     result = provisioner.provision(candidate)
 
-    assert result == candidate
+    assert result.candidate == candidate
+    #assert result == candidate
     discovery.discover.assert_not_called()
 
 
