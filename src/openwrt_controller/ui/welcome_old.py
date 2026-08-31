@@ -2,12 +2,7 @@ import logging
 
 from flask import jsonify, render_template
 
-from openwrt_controller.router_comms.discovery.initial_connection import (
-    discover_and_connect_router,
-)
-
 logger = logging.getLogger(__name__)
-
 
 def register_routes(app, provision_router):
     """Register the router provisioning welcome page."""
@@ -18,50 +13,37 @@ def register_routes(app, provision_router):
 
     @app.get("/api/router/discover")
     def discover_router_endpoint():
-        """Discover a router and check initial SSH communication."""
+        """Discover an OpenWrt router without modifying it."""
 
         logger.info(
             "Router discovery requested from web interface"
         )
 
+        if provision_router is None:
+            return jsonify(
+                {"error": "Router provisioning is not configured."}
+            ), 503
+
         try:
-            result = discover_and_connect_router()
+            candidate = provision_router() #.discovery.discover()
 
-            if result.candidate is None:
-                return jsonify(
-                    {
-                        "found": False,
-                        "connected": False,
-                        "error": str(result.error)
-                        if result.error
-                        else "No router was discovered.",
-                    }
-                ), 404
-
-            response = {
-                "found": True,
-                "connected": result.connected,
-                "address": result.candidate.address,
-                "ssh_port": result.candidate.ssh_port,
-            }
-
-            if result.error is not None:
-                response["error"] = str(result.error)
-
-            return jsonify(response)
+            return jsonify(
+                {
+                    "found": True,
+                    "address": candidate.address,
+                    "ssh_port": candidate.ssh_port,
+                }
+            )
 
         except Exception as exc:
-            logger.exception(
-                "Router discovery and initial connection failed"
-            )
+            logger.exception("Router discovery failed")
 
             return jsonify(
                 {
                     "found": False,
-                    "connected": False,
                     "error": str(exc),
                 }
-            ), 500
+            ), 404
 
     @app.post("/api/router/provision")
     def provision_router_endpoint():
