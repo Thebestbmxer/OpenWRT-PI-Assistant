@@ -12,7 +12,7 @@ class Config:
 
     APPLICATION_USER = os.getenv(
     "ROUTER_CONTROLLER_USER",
-    "router_controller",
+    "router-controller",
     )
 
     # Paths

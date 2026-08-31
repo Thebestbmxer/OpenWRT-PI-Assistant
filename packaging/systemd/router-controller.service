@@ -6,8 +6,8 @@ Wants=network-online.target
 [Service]
 Type=simple
 
-User=router_controller
-Group=router_controller
+User=router-controller
+Group=router-controller
 
 ExecStart=/usr/bin/router_controller
 

@@ -2,25 +2,25 @@
 set -e
 
 if [ "$1" = "configure" ]; then
-    if ! getent group router_controller >/dev/null; then
-        addgroup --system router_controller
+    if ! getent group router-controller >/dev/null; then
+        addgroup --system router-controller
     fi
 
-    if ! getent passwd router_controller >/dev/null; then
+    if ! getent passwd router-controller >/dev/null; then
         adduser --system \
-            --ingroup router_controller \
+            --ingroup router-controller \
             --home /var/lib/router-pi-controller \
             --shell /usr/sbin/nologin \
             --no-create-home \
-            router_controller
+            router-controller
 
         usermod \
             --home /var/lib/router-pi-controller \
-            router_controller
+            router-controller
     fi
 
     mkdir -p /var/lib/router-pi-controller
-    chown router_controller:router_controller /var/lib/router-pi-controller
+    chown router-controller:router-controller /var/lib/router-pi-controller
 fi
 
 exit 0
