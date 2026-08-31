@@ -5,16 +5,33 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
-echo "Creating Python virtual environment..."
+echo "=========================================="
+echo "Router Pi Controller Development Setup"
+echo "=========================================="
+echo
 
-python3 -m venv .venv
+if [ ! -f /etc/debian_version ]; then
+    echo "Error: Debian-based system required for Debian package development."
+    exit 1
+fi
 
-echo "Installing project and test dependencies..."
+echo "Installing Debian build dependencies..."
 
-.venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -e ".[test]"
+sudo apt update
+sudo apt build-dep .
 
+echo
+echo "Installing packaging tools..."
+
+sudo apt install -y \
+    build-essential \
+    devscripts
+
+echo
 echo "Development environment ready."
 echo
-echo "Run tests with:"
-echo "  .venv/bin/pytest -v"
+echo "Run tests:"
+echo "  pytest -v"
+echo
+echo "Build package:"
+echo "  dpkg-buildpackage -us -uc -b"
