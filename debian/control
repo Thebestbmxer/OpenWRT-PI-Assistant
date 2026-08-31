@@ -20,6 +20,6 @@ Depends:
  adduser,
  python3-flask,
  python3-paramiko
-Description: Raspberry Pi controller for Router devices
+Description: Raspberry Pi Router Controller
  Raspberry Pi based management and control application for Router
  routers.
