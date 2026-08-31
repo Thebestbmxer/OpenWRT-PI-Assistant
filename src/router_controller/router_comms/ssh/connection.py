@@ -157,7 +157,7 @@ class RouterConnection:
         if host_key is None:
             return None
 
-        return key.get_fingerprint().hex()
+        return host_key.get_fingerprint().hex()
         '''
         digest = hashlib.sha256(
             host_key.asbytes()

@@ -102,7 +102,8 @@ def test_provision_loads_existing_key(
 
     result = provisioner.provision(candidate)
 
-    assert result == candidate
+    assert result.candidate == candidate
+    #assert result == candidate
 
     key_manager.load_key_pair.assert_called_once_with()
     key_manager.generate_key_pair.assert_not_called()
@@ -161,7 +162,8 @@ def test_provision_discovers_when_candidate_not_supplied(
 
     result = provisioner.provision()
 
-    assert result == candidate
+    assert result.candidate == candidate
+    #assert result == candidate
 
     discovery.discover.assert_called_once_with()
     provisioner.bootstrap_factory_mock.assert_called_once_with(candidate)
