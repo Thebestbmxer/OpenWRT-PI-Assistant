@@ -1,8 +1,8 @@
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
-from router_controller.router_comms.router import Router
-from router_controller.router_comms.router_identity import RouterIdentity
+from router_controller.router_comms.router.router import Router
+from router_controller.router_comms.router.identity import RouterIdentity
 
 
 def test_router_identity_stores_stable_identity():

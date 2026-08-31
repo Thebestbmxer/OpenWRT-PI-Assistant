@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from router_controller.router_comms.router_state import RouterState
-from router_controller.router_comms.router_state_repository import (
+from router_controller.router_comms.router.state import RouterState
+from router_controller.router_comms.router.repository import (
     RouterStateRepository,
 )
 
