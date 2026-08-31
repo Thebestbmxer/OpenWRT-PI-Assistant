@@ -13,6 +13,6 @@ override_dh_auto_test:
 
 override_dh_installsystemd:
 	install -D -m 0644 \
-		packaging/systemd/router_controller.service \
-		debian/router-pi-controller/usr/lib/systemd/system/router_controller.service
+		packaging/systemd/router-controller.service \
+		debian/router-pi-controller/usr/lib/systemd/system/router-controller.service
 	dh_installsystemd --name=router_controller
