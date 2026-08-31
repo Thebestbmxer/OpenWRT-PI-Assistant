@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from typing import Iterable
 
 from router_controller.router_comms.exceptions import RouterNotFoundError
+from router_controller.router_comms.discovery.neighbors import (
+    NeighborDiscovery,
+)
+
 
 
 def _local_ipv4_addresses() -> set[str]:
@@ -84,10 +88,14 @@ class RouterDiscovery:
         ssh_port: int = 22,
         timeout: float = 0.5,
         networks: Iterable[str] | None = None,
+        neighbor_discovery: NeighborDiscovery | None = None,
     ) -> None:
         self.ssh_port = ssh_port
         self.timeout = timeout
         self.networks = list(networks) if networks is not None else None
+        self.neighbor_discovery = (
+        neighbor_discovery or NeighborDiscovery()
+    )
 
     def discover(self) -> RouterCandidate:
         """Return the first reachable router candidate."""
@@ -99,9 +107,13 @@ class RouterDiscovery:
                     continue
 
                 if self._port_is_open(address, self.ssh_port):
+                    neighbor = self.neighbor_discovery.get_neighbor(address)
+
                     return RouterCandidate(
                         address=address,
                         ssh_port=self.ssh_port,
+                        mac_address=neighbor.mac_address,
+                        interface=neighbor.interface,
                     )
 
         raise RouterNotFoundError(

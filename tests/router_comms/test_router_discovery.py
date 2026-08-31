@@ -1,6 +1,7 @@
 """Tests for router discovery."""
 
 from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -8,6 +9,9 @@ from router_controller.router_comms.discovery import router_discovery
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
     RouterDiscovery,
+)
+from router_controller.router_comms.discovery.neighbors import (
+    Neighbor,
 )
 from router_controller.router_comms.exceptions import RouterNotFoundError
 
@@ -109,3 +113,54 @@ def test_discovery_does_not_authenticate():
         candidate = discovery.discover()
 
     assert candidate.address == "192.168.50.1"
+
+def test_discovery_populates_mac_and_interface():
+    neighbor_discovery = MagicMock()
+
+    neighbor_discovery.get_neighbor.return_value = Neighbor(
+        address="192.168.50.1",
+        mac_address="aa:bb:cc:dd:ee:ff",
+        interface="eth0",
+    )
+
+    discovery = RouterDiscovery(
+        networks=["192.168.50.0/24"],
+        neighbor_discovery=neighbor_discovery,
+    )
+
+    with patch.object(
+        discovery,
+        "_port_is_open",
+        return_value=True,
+    ):
+        candidate = discovery.discover()
+
+    assert candidate.mac_address == "aa:bb:cc:dd:ee:ff"
+    assert candidate.interface == "eth0"
+
+    neighbor_discovery.get_neighbor.assert_called_once_with(
+        "192.168.50.1"
+    )
+
+def test_discovery_succeeds_without_mac():
+    neighbor_discovery = MagicMock()
+
+    neighbor_discovery.get_neighbor.return_value = Neighbor(
+        address="192.168.50.1",
+    )
+
+    discovery = RouterDiscovery(
+        networks=["192.168.50.0/24"],
+        neighbor_discovery=neighbor_discovery,
+    )
+
+    with patch.object(
+        discovery,
+        "_port_is_open",
+        return_value=True,
+    ):
+        candidate = discovery.discover()
+
+    assert candidate.address == "192.168.50.1"
+    assert candidate.mac_address is None
+    assert candidate.interface is None
