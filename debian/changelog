@@ -1,9 +1,3 @@
-router-pi-controller (0.3.7) unstable; urgency=medium
-
-  * Rebuilt to new project name
-  * UI: Welcome page allows auto search, search again, install SSH key
-
- -- OpenWrt Pi Controller Project <maintainer@example.invalid>  Sat, 29 Aug 2026 00:00:00 +0000
 
 router-pi-controller (0.3.6) unstable; urgency=medium
 
