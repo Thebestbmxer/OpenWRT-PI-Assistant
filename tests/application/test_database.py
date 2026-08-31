@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
 
-from openwrt_controller.database import initialize_database
+from router_controller.database import initialize_database
 
 
 def test_initialize_database(tmp_path):

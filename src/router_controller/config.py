@@ -6,13 +6,13 @@ class Config:
     """Application configuration."""
 
     # Application
-    APP_NAME = "OpenWrt Pi Controller"
+    APP_NAME = "Router Pi Controller"
     APP_VERSION = "0.1.0"
     DEBUG = False
 
     APPLICATION_USER = os.getenv(
-    "OPENWRT_CONTROLLER_USER",
-    "openwrt-controller",
+    "ROUTER_CONTROLLER_USER",
+    "router_controller",
     )
 
     # Paths
@@ -20,8 +20,8 @@ class Config:
     def get_data_dir(cls):
         return Path(
             os.getenv(
-                "OPENWRT_CONTROLLER_DATA_DIR",
-                "/var/lib/openwrt-pi-controller",
+                "ROUTER_CONTROLLER_DATA_DIR",
+                "/var/lib/router-pi-controller",
             )
         )
 
@@ -42,24 +42,24 @@ class Config:
         return cls.get_ssh_key_directory() / "controller.pub"
 
     # Web application
-    HOST = os.getenv("OPENWRT_CONTROLLER_HOST", "0.0.0.0")
-    PORT = int(os.getenv("OPENWRT_CONTROLLER_PORT", "8080"))
+    HOST = os.getenv("ROUTER_CONTROLLER_HOST", "0.0.0.0")
+    PORT = int(os.getenv("ROUTER_CONTROLLER_PORT", "8080"))
 
-    # OpenWrt SSH connection
-    OPENWRT_HOST = os.getenv(
-        "OPENWRT_CONTROLLER_ROUTER_HOST",
+    # Router SSH connection
+    ROUTER_HOST = os.getenv(
+        "ROUTER_CONTROLLER_ROUTER_HOST",
         "192.168.1.1",
     )
 
-    OPENWRT_SSH_PORT = int(
-        os.getenv("OPENWRT_CONTROLLER_ROUTER_PORT", "22")
+    ROUTER_SSH_PORT = int(
+        os.getenv("ROUTER_CONTROLLER_ROUTER_PORT", "22")
     )
 
-    OPENWRT_SSH_USER = os.getenv(
-        "OPENWRT_CONTROLLER_ROUTER_USER",
+    ROUTER_SSH_USER = os.getenv(
+        "ROUTER_CONTROLLER_ROUTER_USER",
         "root",
     )
 
-    OPENWRT_SSH_TIMEOUT = int(
-        os.getenv("OPENWRT_CONTROLLER_SSH_TIMEOUT", "10")
+    ROUTER_SSH_TIMEOUT = int(
+        os.getenv("ROUTER_CONTROLLER_SSH_TIMEOUT", "10")
     )

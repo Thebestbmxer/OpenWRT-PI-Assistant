@@ -1,7 +1,7 @@
-Source: openwrt-pi-controller
+Source: router-pi-controller
 Section: net
 Priority: optional
-Maintainer: OpenWrt Pi Controller Project
+Maintainer: Router Pi Controller Project
 Build-Depends:
  debhelper-compat (= 13),
  pybuild-plugin-pyproject,
@@ -10,13 +10,13 @@ Build-Depends:
 Standards-Version: 4.6.2
 Rules-Requires-Root: no
 
-Package: openwrt-pi-controller
+Package: router-pi-controller
 Architecture: all
 Depends:
  ${python3:Depends},
  ${misc:Depends},
  adduser,
  python3-flask
-Description: Raspberry Pi controller for OpenWrt devices
- Raspberry Pi based management and control application for OpenWrt
+Description: Raspberry Pi controller for Router devices
+ Raspberry Pi based management and control application for Router
  routers.

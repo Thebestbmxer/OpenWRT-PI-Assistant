@@ -4,12 +4,12 @@ import pytest
 @pytest.fixture(autouse=True)
 def test_environment(tmp_path, monkeypatch):
     monkeypatch.setenv(
-        "OPENWRT_CONTROLLER_DATA_DIR",
-        str(tmp_path / "openwrt-pi-controller-test"),
+        "ROUTER_CONTROLLER_DATA_DIR",
+        str(tmp_path / "router-pi-controller-test"),
     )
 
 def test_create_app():
-    from openwrt_controller.app import create_app
+    from router_controller.app import create_app
     app = create_app()
 
     assert app is not None
@@ -18,7 +18,7 @@ def test_create_app():
 
 
 def test_index():
-    from openwrt_controller.app import create_app
+    from router_controller.app import create_app
     app = create_app()
 
     client = app.test_client()
@@ -26,10 +26,10 @@ def test_index():
     response = client.get("/")
 
     assert response.status_code == 200
-    #assert response.data == b"OpenWrt Pi Controller"
+    #assert response.data == b"Router Pi Controller"
 
 def test_create_app_initializes_database(tmp_path):
-    from openwrt_controller.app import create_app
+    from router_controller.app import create_app
 
     class TestConfig:
         HOST = "127.0.0.1"
@@ -61,7 +61,7 @@ def test_create_app_initializes_database(tmp_path):
     assert "events" in table_names
 
 def test_create_app_logs_startup(tmp_path):
-    from openwrt_controller.app import create_app
+    from router_controller.app import create_app
 
     class TestConfig:
         HOST = "127.0.0.1"
@@ -74,4 +74,4 @@ def test_create_app_logs_startup(tmp_path):
     log_file = tmp_path / "logs" / "controller.log"
 
     assert log_file.exists()
-    assert "Starting OpenWrt Pi Controller" in log_file.read_text()
+    assert "Starting Router Pi Controller" in log_file.read_text()

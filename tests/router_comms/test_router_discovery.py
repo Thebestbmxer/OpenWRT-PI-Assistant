@@ -4,12 +4,12 @@ from unittest.mock import patch
 
 import pytest
 
-from openwrt_controller.router_comms.discovery import router_discovery
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery import router_discovery
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
     RouterDiscovery,
 )
-from openwrt_controller.router_comms.exceptions import RouterNotFoundError
+from router_controller.router_comms.exceptions import RouterNotFoundError
 
 
 def test_discovery_returns_reachable_candidate():

@@ -6,16 +6,16 @@ from unittest.mock import MagicMock, patch
 import paramiko
 import pytest
 
-from openwrt_controller.router_comms.ssh.connection import (
+from router_controller.router_comms.ssh.connection import (
     RouterConnection,
 )
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     InitialCommunicationError,
 )
-from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
+from router_controller.router_comms.ssh.keys import SSHKeyPair
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_connect_uses_controller_private_key(
     client = MagicMock()
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -70,7 +70,7 @@ def test_connect_marks_connection_active(
     client.get_transport.return_value = transport
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -90,7 +90,7 @@ def test_execute_returns_command_result(
     stderr = MagicMock()
     stdin = MagicMock()
 
-    stdout.read.return_value = b"OpenWrt\n"
+    stdout.read.return_value = b"Router\n"
     stderr.read.return_value = b""
     stdout.channel.recv_exit_status.return_value = 0
 
@@ -101,22 +101,22 @@ def test_execute_returns_command_result(
     )
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
         connection.connect()
 
         output, error, status = connection.execute(
-            "cat /etc/openwrt_release"
+            "cat /etc/router_release"
         )
 
-    assert output == "OpenWrt\n"
+    assert output == "Router\n"
     assert error == ""
     assert status == 0
 
     client.exec_command.assert_called_once_with(
-        "cat /etc/openwrt_release"
+        "cat /etc/router_release"
     )
 
 
@@ -138,7 +138,7 @@ def test_connection_error_is_wrapped(
     client.connect.side_effect = OSError("connection refused")
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -157,7 +157,7 @@ def test_authentication_error_is_wrapped(
     client.connect.side_effect = paramiko.AuthenticationException()
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)
@@ -175,7 +175,7 @@ def test_close_disconnects_client(
     client = MagicMock()
 
     with patch(
-        "openwrt_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
         connection = RouterConnection(candidate, key_pair)

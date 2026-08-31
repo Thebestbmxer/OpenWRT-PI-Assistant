@@ -2,15 +2,15 @@
 set -e
 
 if [ "$1" = "purge" ]; then
-    if getent passwd openwrt-controller >/dev/null; then
-        deluser --system openwrt-controller || true
+    if getent passwd router_controller >/dev/null; then
+        deluser --system router_controller || true
     fi
 
-    if getent group openwrt-controller >/dev/null; then
-        delgroup --system openwrt-controller || true
+    if getent group router_controller >/dev/null; then
+        delgroup --system router_controller || true
     fi
 
-    rm -rf /var/lib/openwrt-pi-controller
+    rm -rf /var/lib/router-pi-controller
 fi
 
 exit 0

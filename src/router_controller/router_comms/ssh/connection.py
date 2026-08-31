@@ -5,13 +5,13 @@ from pathlib import Path
 
 import paramiko
 
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     InitialCommunicationError,
 )
-from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
+from router_controller.router_comms.ssh.keys import SSHKeyPair
 
 
 @dataclass(frozen=True)

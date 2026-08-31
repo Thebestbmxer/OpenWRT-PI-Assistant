@@ -7,10 +7,10 @@ from typing import Sequence
 
 import paramiko
 
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     AuthenticationError,
     InitialCommunicationError,
 )

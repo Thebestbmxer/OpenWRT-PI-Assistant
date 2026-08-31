@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from openwrt_controller.logging_config import configure_logging
+from router_controller.logging_config import configure_logging
 
 
 def test_configure_logging(tmp_path):

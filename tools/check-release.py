@@ -6,10 +6,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
-INIT_FILE = ROOT / "src" / "openwrt_controller" / "__init__.py"
+INIT_FILE = ROOT / "src" / "router_controller" / "__init__.py"
 CHANGELOG = ROOT / "debian" / "changelog"
 
-PACKAGE_NAME = "openwrt-pi-controller"
+PACKAGE_NAME = "router-pi-controller"
 
 
 def read_project_version() -> str:

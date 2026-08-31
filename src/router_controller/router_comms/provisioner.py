@@ -6,18 +6,18 @@ from typing import Callable
 
 import paramiko
 
-from openwrt_controller.router_comms.discovery.bootstrap import (
+from router_controller.router_comms.discovery.bootstrap import (
     RouterBootstrap,
 )
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
     RouterDiscovery,
 )
-from openwrt_controller.router_comms.ssh.connection import RouterConnection
-from openwrt_controller.router_comms.ssh.key_installer import (
+from router_controller.router_comms.ssh.connection import RouterConnection
+from router_controller.router_comms.ssh.key_installer import (
     RouterKeyInstaller,
 )
-from openwrt_controller.router_comms.ssh.keys import (
+from router_controller.router_comms.ssh.keys import (
     SSHKeyManager,
     SSHKeyPair,
 )

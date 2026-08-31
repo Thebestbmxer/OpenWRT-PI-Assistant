@@ -1,15 +1,15 @@
 [Unit]
-Description=OpenWrt Pi Controller
+Description=Router Pi Controller
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 
-User=openwrt-controller
-Group=openwrt-controller
+User=router_controller
+Group=router_controller
 
-ExecStart=/usr/bin/openwrt-controller
+ExecStart=/usr/bin/router_controller
 
 Restart=on-failure
 RestartSec=5

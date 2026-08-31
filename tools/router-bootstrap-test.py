@@ -6,19 +6,19 @@ initial SSH authentication succeeds. It does not execute commands or
 modify the router.
 """
 
-from openwrt_controller.router_comms.discovery.bootstrap import (
+from router_controller.router_comms.discovery.bootstrap import (
     RouterBootstrap,
     )
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterDiscovery,
     )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     AuthenticationError,
     InitialCommunicationError,
     )
 
 def main() -> int:
-    print("OpenWrt Pi Controller - Router Bootstrap Test")
+    print("Router Pi Controller - Router Bootstrap Test")
     print()
     print("Scanning local networks for SSH-accessible devices...")
     print()

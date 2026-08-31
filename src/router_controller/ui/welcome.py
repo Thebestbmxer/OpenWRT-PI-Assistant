@@ -2,7 +2,7 @@ import logging
 
 from flask import jsonify, render_template
 
-from openwrt_controller.router_comms.discovery.initial_connection import (
+from router_controller.router_comms.discovery.initial_connection import (
     discover_and_connect_router,
 )
 

@@ -5,7 +5,7 @@
 
 override_dh_auto_install:
 	dh_auto_install
-	dh_installdirs var/lib/openwrt-pi-controller
+	dh_installdirs var/lib/router-pi-controller
 
 override_dh_auto_test:
 	#python3 -m pytest -v
@@ -13,6 +13,6 @@ override_dh_auto_test:
 
 override_dh_installsystemd:
 	install -D -m 0644 \
-		packaging/systemd/openwrt-controller.service \
-		debian/openwrt-pi-controller/usr/lib/systemd/system/openwrt-controller.service
-	dh_installsystemd --name=openwrt-controller
+		packaging/systemd/router_controller.service \
+		debian/router-pi-controller/usr/lib/systemd/system/router_controller.service
+	dh_installsystemd --name=router_controller

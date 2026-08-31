@@ -6,10 +6,10 @@ from unittest.mock import MagicMock
 import paramiko
 import pytest
 
-from openwrt_controller.router_comms.ssh.key_installer import (
+from router_controller.router_comms.ssh.key_installer import (
     RouterKeyInstaller,
 )
-from openwrt_controller.router_comms.ssh.keys import SSHKeyPair
+from router_controller.router_comms.ssh.keys import SSHKeyPair
 
 
 @pytest.fixture

@@ -27,4 +27,4 @@ def configure_logging(config=Config):
         force=True,
     )
 
-    return logging.getLogger("openwrt_controller")
+    return logging.getLogger("router_controller")

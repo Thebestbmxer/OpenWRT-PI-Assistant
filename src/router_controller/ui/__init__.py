@@ -1,6 +1,6 @@
-"""Web UI for the OpenWrt Pi Controller."""
+"""Web UI for the Router Pi Controller."""
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 from flask import Flask
 
@@ -13,6 +13,4 @@ def register_ui_context(app: Flask) -> None:
     def inject_ui_context() -> dict[str, str]:
         """Provide common UI values to templates."""
 
-        return {
-            "ui_version": __version__,
-        }
+        return {"ui_version": __version__,}

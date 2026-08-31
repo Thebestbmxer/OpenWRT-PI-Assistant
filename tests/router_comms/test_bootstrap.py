@@ -5,16 +5,16 @@ from unittest.mock import MagicMock, patch
 import paramiko
 import pytest
 
-from openwrt_controller.router_comms.discovery.bootstrap import (
+from router_controller.router_comms.discovery.bootstrap import (
     DEFAULT_PASSWORDS,
     DEFAULT_USERNAME,
     BootstrapCredentials,
     RouterBootstrap,
 ) 
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     AuthenticationError,
     InitialCommunicationError,
 )
@@ -50,10 +50,10 @@ def test_bootstrap_tries_blank_password_first(candidate):
     transport.is_authenticated.return_value = True
 
     with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
         return_value=client,
     ), patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.Transport",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.Transport",
         return_value=transport,
     ):
         bootstrap = RouterBootstrap(candidate)
@@ -77,10 +77,10 @@ def test_bootstrap_falls_back_to_password(candidate):
     password_client.connect.return_value = None
 
     with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
         side_effect=[MagicMock(), password_client],
     ), patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.Transport",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.Transport",
         return_value=blank_transport,
     ):
         bootstrap = RouterBootstrap(candidate)
@@ -110,10 +110,10 @@ def test_bootstrap_raises_authentication_error(candidate):
     client.connect.side_effect = paramiko.AuthenticationException()
 
     with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
         return_value=client,
     ), patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.Transport",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.Transport",
         return_value=transport,
     ):
         bootstrap = RouterBootstrap(candidate)
@@ -127,10 +127,10 @@ def test_bootstrap_raises_connection_error(candidate):
     transport.start_client.side_effect = OSError("connection refused")
 
     with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
         return_value=MagicMock(),
     ), patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.Transport",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.Transport",
         return_value=transport,
     ):
         bootstrap = RouterBootstrap(candidate)
@@ -149,7 +149,7 @@ def test_bootstrap_disables_ssh_agent_and_existing_keys(candidate):
     )
 
     with patch(
-        "openwrt_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
+        "router_controller.router_comms.discovery.bootstrap.paramiko.SSHClient",
         return_value=client,
     ):
         bootstrap.connect()

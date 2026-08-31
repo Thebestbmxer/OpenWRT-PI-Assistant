@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome - OpenWrt Pi Controller{% endblock %}
+{% block title %}Welcome - Router Pi Controller{% endblock %}
 
 {% block head %}
 
 <section class="welcome-header">
-    <h1>OpenWrt Pi Controller</h1>
+    <h1>Router Pi Controller</h1>
 
     <p>
         Welcome. The controller must establish secure SSH access
-        to an OpenWrt router before the application can continue.
+        to an Router before the application can continue.
     </p>
 </section>
 {% endblock %}
@@ -193,16 +193,21 @@
         clearRouter();
         showStatus("Searching for an OpenWrt router...", "working");
         try {
-            const response = await fetch("/api/router/discover", { method: "GET", cache: "no-store" });
-            const result = await response.json(); if (!response.ok || !result.found) {
+            const response = await fetch("/api/router/discover", {
+                method: "GET", cache: "no-store"
+            });
+            const result = await response.json();
+            if (!response.ok || !result.found) {
                 throw new Error(result.error || "No router was found.");
             }
             showRouter(result.address, result.ssh_port);
             showStatus("Router discovered. You can now install the controller SSH key.", "success");
-        } catch (error) {
+        }
+        catch (error) {
             clearRouter();
             showStatus("Router discovery failed: " + error.message, "error");
-        } finally { searchButton.disabled = false; }
+        }
+        finally { searchButton.disabled = false; }
     }
     async function installSSHKey() {
         searchButton.disabled = true; installButton.disabled = true;

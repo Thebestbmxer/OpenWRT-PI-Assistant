@@ -6,15 +6,15 @@ from dataclasses import dataclass
 
 import paramiko
 
-from openwrt_controller.router_comms.discovery.bootstrap import (
+from router_controller.router_comms.discovery.bootstrap import (
     BootstrapCredentials,
     RouterBootstrap,
 )
-from openwrt_controller.router_comms.discovery.router_discovery import (
+from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
     RouterDiscovery,
 )
-from openwrt_controller.router_comms.exceptions import (
+from router_controller.router_comms.exceptions import (
     AuthenticationError,
     InitialCommunicationError,
     RouterNotFoundError,

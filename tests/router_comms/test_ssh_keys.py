@@ -5,7 +5,7 @@ from pathlib import Path
 import paramiko
 import pytest
 
-from openwrt_controller.router_comms.ssh.keys import (
+from router_controller.router_comms.ssh.keys import (
     SSHKeyManager,
     SSHKeyPair,
 )

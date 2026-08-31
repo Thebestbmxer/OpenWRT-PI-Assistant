@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-INIT_FILE = ROOT / "src" / "openwrt_controller" / "__init__.py"
+INIT_FILE = ROOT / "src" / "router_controller" / "__init__.py"
 
 VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -82,7 +82,7 @@ def check_git_tag(version: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate the OpenWrt Pi Controller version."
+        description="Validate the Router Pi Controller version."
     )
     parser.add_argument(
         "--check-tag",

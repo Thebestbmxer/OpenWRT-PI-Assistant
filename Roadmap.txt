@@ -1,4 +1,4 @@
-OpenWrt Pi Controller — Development Handoff
+Router Pi Controller — Development Handoff
 Project Overview
 
 Project: OpenWrt Pi Controller
@@ -54,10 +54,10 @@ openwrt-pi-assistant/
 │
 ├── packaging/
 │   └── systemd/
-│       └── openwrt-controller.service
+│       └── router-controller.service
 │
 ├── src/
-│   └── openwrt_controller/
+│   └── router_controller/
 │       ├── __init__.py
 │       ├── app.py
 │       ├── config.py

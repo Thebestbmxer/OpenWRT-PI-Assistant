@@ -7,7 +7,7 @@ import socket
 from dataclasses import dataclass
 from typing import Iterable
 
-from openwrt_controller.router_comms.exceptions import RouterNotFoundError
+from router_controller.router_comms.exceptions import RouterNotFoundError
 
 
 def _local_ipv4_addresses() -> set[str]:
