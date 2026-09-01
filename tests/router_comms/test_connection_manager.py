@@ -12,6 +12,8 @@ from router_controller.router_comms.ssh.connection_manager import (
     RouterConnectionManager,
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
+from router_controller.router_comms.router.state import RouterState
+
 
 
 @pytest.fixture
@@ -206,3 +208,34 @@ def test_connected_reflects_connection_state(
     connection.connected = False
 
     assert manager.connected is False
+
+def test_connection_manager_uses_persisted_host_key(
+    candidate,
+    key_pair,
+):
+    state = RouterState(
+        mac_address="aa:bb:cc:dd:ee:ff",
+        ssh_host_key="aabbccdd",
+        ip_address="192.168.50.1",
+    )
+
+    connection = MagicMock()
+    connection.connected = False
+
+    factory = MagicMock(return_value=connection)
+
+    manager = RouterConnectionManager(
+        candidate,
+        key_pair,
+        state=state,
+        connection_factory=factory,
+    )
+
+    manager.connect()
+
+    factory.assert_called_once()
+
+    config = factory.call_args.args[2]
+
+    assert config.username == "root"
+    assert config.expected_host_key_fingerprint == "aabbccdd"

@@ -9,8 +9,10 @@ from router_controller.router_comms.discovery.router_discovery import (
 )
 from router_controller.router_comms.ssh.connection import (
     RouterConnection,
+    RouterConnectionConfig,
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
+from router_controller.router_comms.router.state import RouterState
 
 
 class RouterConnectionManager:
@@ -27,13 +29,15 @@ class RouterConnectionManager:
         self,
         candidate: RouterCandidate,
         key_pair: SSHKeyPair,
+        state: RouterState | None = None,
         connection_factory: Callable[
-            [RouterCandidate, SSHKeyPair],
+            [RouterCandidate, SSHKeyPair, RouterConnectionConfig],
             RouterConnection,
         ] = RouterConnection,
     ) -> None:
         self.candidate = candidate
         self.key_pair = key_pair
+        self.state = state
         self.connection_factory = connection_factory
 
         self._connection: RouterConnection | None = None
@@ -51,6 +55,7 @@ class RouterConnectionManager:
         connection = self.connection_factory(
             self.candidate,
             self.key_pair,
+            self._connection_config(),
         )
 
         connection.connect()
@@ -89,3 +94,14 @@ class RouterConnectionManager:
         """Return the current connection, if one exists."""
 
         return self._connection
+
+    def _connection_config(self) -> RouterConnectionConfig:
+        """Build SSH configuration from persisted router state."""
+
+        if self.state is None:
+            return RouterConnectionConfig()
+
+        return RouterConnectionConfig(
+            username=self.state.username,
+            expected_host_key_fingerprint=self.state.ssh_host_key,
+        )
