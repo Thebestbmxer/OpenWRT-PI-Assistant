@@ -475,3 +475,56 @@ def test_connect_rejects_mismatched_host_key(
     assert connection.connected is False
     assert connection._client is None
     client.close.assert_called_once()
+
+def test_connect_accepts_matching_host_key(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+
+    def connect_side_effect(**kwargs):
+        policy = client.set_missing_host_key_policy.call_args.args[0]
+
+        key = MagicMock()
+        key.get_fingerprint.return_value = (
+            b"\xaa\xbb\xcc\xdd"
+        )
+
+        policy.missing_host_key(
+            client,
+            candidate.address,
+            key,
+        )
+
+    client.connect.side_effect = connect_side_effect
+
+    transport = MagicMock()
+    transport.is_active.return_value = True
+    client.get_transport.return_value = transport
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(
+            candidate,
+            key_pair,
+            RouterConnectionConfig(
+                expected_host_key_fingerprint="aabbccdd",
+            ),
+        )
+
+        connection.connect()
+
+    client.connect.assert_called_once_with(
+        hostname="192.168.50.1",
+        port=22,
+        username="root",
+        key_filename=str(key_pair.private_key_path),
+        timeout=5.0,
+        allow_agent=False,
+        look_for_keys=False,
+    )
+
+    assert connection.connected is True
+    assert connection._client is client
