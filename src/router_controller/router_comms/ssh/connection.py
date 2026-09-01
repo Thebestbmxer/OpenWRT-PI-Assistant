@@ -113,6 +113,10 @@ class RouterConnection:
                 look_for_keys=False,
             )
 
+        except RouterIdentityError:
+            client.close()
+            raise
+
         except (
             paramiko.AuthenticationException,
             paramiko.SSHException,
