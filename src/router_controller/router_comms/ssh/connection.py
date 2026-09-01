@@ -35,7 +35,7 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """Verify an SSH host key against an expected fingerprint."""
 
     def __init__(self, expected_fingerprint: str) -> None:
-        self.expected_fingerprint = expected_fingerprint.strip().casefold()
+        self.expected_fingerprint = expected_fingerprint.strip()
 
     def missing_host_key(
         self,
@@ -47,7 +47,7 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
 
         fingerprint = host_key_fingerprint(key).casefold()
 
-        if fingerprint != self.expected_fingerprint:
+        if fingerprint.casefold() != self.expected_fingerprint.casefold():
             raise RouterIdentityError(
                 f"Router host key fingerprint mismatch for {hostname}."
             )
