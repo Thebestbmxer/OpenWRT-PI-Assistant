@@ -1,0 +1,650 @@
+Router Pi Controller — Updated Roadmap
+Phase 0 — Foundation ✅ COMPLETE
+
+The original foundation is now effectively finished.
+Application
+
+    Debian package: router-pi-controller
+    Python package: router_controller
+    Systemd service: router-controller.service
+    Dedicated router-controller user/group
+    /var/lib/router-pi-controller persistent data directory
+    Flask application
+    Welcome/provisioning page
+    Automatic startup after reboot
+    Service restart behavior
+
+Packaging
+
+    Package installation
+    Package upgrade
+    Package removal/purge
+    Persistent data preservation across upgrades
+    Service account preservation
+    Version/changelog handling
+    GitHub release/tagging
+
+SSH provisioning
+
+    SSH key generation
+    Existing key loading
+    Key integrity checking
+    Public-key installation
+    Idempotent key installation
+    Bootstrap SSH connection
+    Permanent key-based SSH connection
+    Bootstrap connection closed before permanent connection
+
+Testing
+
+We started at 67 tests and are now at:
+
+97 tests passing
+
+The test suite covers the foundation, router communications, discovery, SSH keys, provisioning, packaging, and the new router identity/state work.
+Phase 1 — Router Identity & Persistent Connection 🟡 IN PROGRESS
+
+This is where we are now.
+
+The original Phase 1 has effectively expanded into a more concrete architecture.
+1.1 Router device model ✅
+
+Implemented:
+
+Router
+├── identity
+├── candidate
+├── name
+├── model
+├── architecture
+└── target
+
+The important architectural separation is:
+
+Identity
+    MAC
+    SSH host-key fingerprint
+
+Location
+    IP
+    SSH port
+    interface
+
+This is the correct foundation for DHCP changes and network rediscovery.
+1.2 Router identity ✅
+
+Implemented:
+
+RouterIdentity
+├── mac_address
+└── ssh_host_key_fingerprint
+
+The router's identity is therefore independent of its current IP address.
+
+Tests are passing for:
+
+    stable identity
+    identity/location separation
+
+1.3 Router state persistence ✅
+
+Implemented:
+
+RouterState
+├── MAC
+├── SSH host key
+├── IP
+├── SSH port
+├── username
+├── first_seen
+└── last_seen
+
+And:
+
+RouterStateRepository
+├── save()
+└── load()
+
+The repository persists state under the controller's data directory.
+
+Tests verify:
+
+    state can be saved
+    state can be loaded
+    missing state is handled
+    IP changes don't destroy router identity
+
+So this portion is already substantially complete.
+1.4 Network discovery ✅
+
+The discovery architecture is now much better than the original "guess an IP" approach.
+
+Current flow:
+
+Pi network interfaces
+        │
+        ▼
+Local IPv4 networks
+        │
+        ▼
+Candidate addresses
+        │
+        ▼
+SSH port check
+        │
+        ▼
+RouterCandidate
+
+Discovery does not authenticate or modify the router.
+
+That's an important separation.
+1.5 MAC/neighbor discovery ✅
+
+We've now added the foundation for determining the MAC associated with an IP through the Pi's local neighbor information.
+
+This supports the architecture we discussed earlier:
+
+Current Pi IP/network
+        │
+        ▼
+Determine local network
+        │
+        ▼
+Find router candidate
+        │
+        ▼
+Check neighbor/MAC information
+        │
+        ▼
+Compare with known router
+
+Tests are passing.
+1.6 Persistent SSH connection ✅
+
+RouterConnection exists and supports:
+
+    SSH authentication using the controller key
+    connection state
+    command execution
+    clean shutdown
+    connection status
+    host-key fingerprint retrieval
+
+We've also tested:
+
+    successful connection
+    authentication failure
+    connection failure
+    command execution
+    connection reuse behavior
+    disconnect
+    fingerprint retrieval
+
+1.7 Connection Manager ✅
+
+We've now built the first layer above RouterConnection.
+
+Conceptually:
+
+ConnectionManager
+       │
+       ▼
+RouterConnection
+       │
+       ▼
+Paramiko
+       │
+       ▼
+OpenWrt
+
+The manager handles the lifecycle rather than making the Flask application responsible for SSH.
+
+Tests are passing for:
+
+    creating a connection
+    reusing an active connection
+    closing connections
+    connection lifecycle behavior
+
+1.8 Secure host-key verification 🔴 NEXT
+
+This is the next actual development task.
+
+Currently the permanent SSH connection still has:
+
+AutoAddPolicy()
+
+That isn't acceptable as the final security model.
+
+We need to implement:
+
+Known router
+      │
+      ▼
+Expected host-key fingerprint
+      │
+      ▼
+SSH connection
+      │
+      ▼
+Host key received
+      │
+      ├── MATCH ───────► CONNECTED
+      │
+      └── MISMATCH ────► REJECT
+
+This is the point where the router's SSH identity becomes a genuine security control rather than merely information we collect.
+Tests to add
+
+At minimum:
+
+    unknown host key handling
+    matching fingerprint accepted
+    changed fingerprint rejected
+    fingerprint stored correctly
+    fingerprint survives state persistence
+    connection failure on identity mismatch
+
+This is our next coding step.
+1.9 Complete persistent router lifecycle 🟡
+
+After host-key verification, we'll connect all the pieces together.
+
+The desired lifecycle becomes:
+
+Pi boots
+   │
+   ▼
+Controller starts
+   │
+   ▼
+Load RouterState
+   │
+   ├── No state ──────────► Initial discovery
+   │
+   ▼
+Known router
+   │
+   ▼
+Try last known IP
+   │
+   ├── Success ───────────► Verify identity
+   │
+   └── Failure
+          │
+          ▼
+     Local discovery
+          │
+          ▼
+     MAC verification
+          │
+          ▼
+     SSH host-key verification
+          │
+          ▼
+        CONNECT
+          │
+          ▼
+    Update RouterState
+
+This will be the real completion of the current milestone.
+Phase 2 — Router Information API ⏳
+
+Once we have a reliable connection, we should stop having the UI know anything about SSH commands or OpenWrt internals.
+
+Introduce something like:
+
+Router
+ │
+ └── RouterInformation
+       ├── system()
+       ├── network()
+       ├── security()
+       └── services()
+
+For example:
+
+router.get_system_info()
+router.get_network_info()
+router.get_security_status()
+
+The UI receives normalized information.
+Phase 3 — OpenWrt Integration ⏳
+
+Move OpenWrt-specific commands into:
+
+integrations/
+└── openwrt/
+    ├── system.py
+    ├── network.py
+    ├── security.py
+    ├── services.py
+    └── capabilities.py
+
+The core controller shouldn't need to know that OpenWrt uses particular commands/files.
+
+Instead:
+
+Controller
+     │
+     ▼
+Router API
+     │
+     ▼
+OpenWrt Integration
+     │
+     ▼
+SSH
+
+This is also where we'll determine exactly what information the router can provide.
+Phase 4 — Home / Status Page ⏳
+
+This becomes the first real operational dashboard.
+
+Initially:
+Router
+
+    Name
+    Model
+    Architecture
+    Target
+    Firmware
+    Kernel
+    Local time
+    Uptime
+    Load
+
+Connection
+
+    Connected/disconnected
+    IP
+    MAC
+    SSH status
+    Host-key status
+
+Security
+
+Dynamic warnings such as:
+
+⚠ SSH password authentication enabled
+⚠ Root password login enabled
+⚠ Other security issues
+
+The important difference from the old welcome page is that this becomes live information from the actual router.
+Phase 5 — Raspberry Pi System Profile ⏳
+
+The Pi becomes a managed device too.
+
+Raspberry Pi
+├── hostname
+├── model
+├── architecture
+├── OS
+├── kernel
+├── CPU
+├── memory
+├── storage
+├── uptime
+└── interfaces
+
+Eventually:
+
+ROUTER
+    ● Connected
+
+RASPBERRY PI
+    ● Healthy
+
+SERVICES
+    ● Running
+
+Phase 6 — Service Framework ⏳
+
+Build the generic service abstraction before adding individual services.
+
+Service
+├── id
+├── name
+├── installed
+├── enabled
+├── running
+├── version
+├── health
+└── capabilities
+
+The controller itself should become one of those services.
+Phase 7 — Future Services 🚧 FUTURE PHASE
+
+Per your decision, these are deliberately out of the current development path.
+Future:
+
+    Unbound
+    Pi-hole
+    WireGuard
+    OpenVPN
+    Other VPN services
+    Additional Pi-hosted services
+
+These should plug into the service framework rather than being built directly into the core.
+Phase 8 — Network Topology 🚧 FUTURE
+
+Eventually understand relationships such as:
+
+Internet
+   │
+   ▼
+Home Router
+   │
+   ▼
+OpenWrt Router
+   │
+   ▼
+Router Pi
+   ├── DNS
+   ├── VPN
+   └── Other services
+
+This becomes especially useful because of your three router configurations:
+
+1. Main Router
+       │
+       ▼
+    WAN port
+    OpenWrt
+       │
+       ▼
+      Pi
+
+2. Trusted Wi-Fi
+       │
+       ▼
+    OpenWrt
+       │
+       ▼
+      Pi
+
+3. Untrusted Wi-Fi
+       │
+       ▼
+    OpenWrt
+       │
+       ▼
+      Pi
+
+The controller should eventually understand these as different network topologies rather than assuming WAN/LAN semantics.
+Phase 9 — Multi-Router 🚧 FUTURE
+
+Also explicitly moved out of the current milestone.
+
+Eventually:
+
+Routers
+├── Home
+├── Office
+└── Travel
+
+The architecture we've built with Router, RouterState, and ConnectionManager makes this possible later without redesigning everything.
+Phase 10 — Dashboard / Display Framework 🚧 FUTURE
+
+Once the backend is stable:
+
+Backend
+   │
+   ▼
+Normalized device data
+   │
+   ├── Desktop
+   ├── Mobile
+   ├── Compact
+   ├── Monitoring
+   └── Custom
+
+The presentation layer won't dictate how the controller gathers information.
+Phase 11 — Security Hardening ⏳
+
+Some security work is already happening now, but this will be the final comprehensive security review.
+Controller
+
+    Unprivileged service account
+    Private key permissions
+    Database permissions
+    Configuration permissions
+    SSH host-key verification
+    Input validation
+    No arbitrary SSH command exposure
+    Shell injection review
+
+Router
+
+    SSH configuration
+    Password authentication
+    Root login
+    Firewall/security configuration
+    Host identity changes
+    Other OpenWrt security checks
+
+Phase 12 — Reliability ⏳
+
+The final controller should survive:
+
+Router reboot
+Pi reboot
+Ethernet unplugged
+DHCP change
+Wi-Fi disconnect
+Wi-Fi reconnect
+SSH timeout
+Temporary network loss
+Router firmware reboot
+
+Without manual intervention.
+
+Expected state machine:
+
+CONNECTED
+    │
+    ▼
+NETWORK LOST
+    │
+    ▼
+DISCOVERING
+    │
+    ▼
+IDENTIFYING
+    │
+    ▼
+AUTHENTICATING
+    │
+    ▼
+CONNECTED
+
+Phase 13 — Final Packaging & Release ⏳
+
+Verify:
+
+Fresh install
+      ↓
+Provision
+      ↓
+Reboot
+      ↓
+Reconnect
+      ↓
+Upgrade
+      ↓
+Reboot
+      ↓
+Reconnect
+      ↓
+Purge
+
+Persistent state must behave correctly throughout.
+Current Position
+
+I'd summarize the project right now as:
+
+PHASE 0
+Foundation
+████████████████████ 100% ✅
+
+PHASE 1
+Router Identity & Persistent Connection
+████████████████░░░░  ~80%
+
+    Device model              ✅
+    Router identity           ✅
+    Persistent state          ✅
+    State repository          ✅
+    Network discovery         ✅
+    MAC discovery             ✅
+    SSH connection            ✅
+    Connection manager        ✅
+    Host-key verification     ← NEXT
+    Full reconnect lifecycle  ← AFTER THAT
+
+PHASE 2
+Router Information API
+░░░░░░░░░░░░░░░░░░░░  0%
+
+PHASE 3
+OpenWrt Integration
+░░░░░░░░░░░░░░░░░░░░  0%
+
+PHASE 4
+Status Page
+░░░░░░░░░░░░░░░░░░░░  0%
+
+PHASE 5+
+Pi / Services / Dashboard
+░░░░░░░░░░░░░░░░░░░░
+
+FUTURE
+Unbound / Pi-hole / VPN / Multi-router / Topology
+
+The immediate path
+
+So I would not jump ahead to the status page yet.
+
+We have one particularly important piece to finish first:
+
+97 tests ✅
+     │
+     ▼
+Host-key verification
+     │
+     ▼
+Connect state ↔ persistent state
+     │
+     ▼
+Boot / reconnect lifecycle
+     │
+     ▼
+REAL ROUTER TEST
+     │
+     ▼
+Router Information API
+     │
+     ▼
+STATUS PAGE
+
+That puts us in a very good position: the architecture is now being built around persistent router identity + secure communications, rather than building a status page around a one-off SSH connection.

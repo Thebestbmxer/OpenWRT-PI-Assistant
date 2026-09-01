@@ -21,7 +21,28 @@ class RouterConnectionConfig:
 
     username: str = "root"
     timeout: float = 5.0
+    expected_host_key_fingerprint: str | None = None
 
+class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
+    """Verify an SSH host key against an expected fingerprint."""
+
+    def __init__(self, expected_fingerprint: str) -> None:
+        self.expected_fingerprint = expected_fingerprint.lower()
+
+    def missing_host_key(
+        self,
+        client: paramiko.SSHClient,
+        hostname: str,
+        key: paramiko.PKey,
+    ) -> None:
+        """Accept the host key only when its fingerprint matches."""
+
+        fingerprint = key.get_fingerprint().hex().lower()
+
+        if fingerprint != self.expected_fingerprint:
+            raise paramiko.SSHException(
+                f"Router host key fingerprint mismatch for {hostname}."
+            )
 
 class RouterConnection:
     """Manage an authenticated SSH connection to an OpenWrt router."""
@@ -44,11 +65,25 @@ class RouterConnection:
         if self._client is not None:
             return
 
-        client = paramiko.SSHClient()
-
+        #client = paramiko.SSHClient()
         # Host-key verification will be added before permanent
         # router connections are enabled.
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        #client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        #Code below replaces the code above
+        client = paramiko.SSHClient()
+
+        if self.config.expected_host_key_fingerprint is not None:
+            client.set_missing_host_key_policy(
+                RouterHostKeyPolicy(
+                    self.config.expected_host_key_fingerprint
+                )
+            )
+        else:
+            client.set_missing_host_key_policy(
+                paramiko.AutoAddPolicy()
+            )
+
 
         try:
             client.connect(
