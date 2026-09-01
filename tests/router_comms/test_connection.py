@@ -10,6 +10,7 @@ from router_controller.router_comms.ssh.connection import (
     RouterConnection,
     RouterConnectionConfig,
     RouterHostKeyPolicy,
+    host_key_fingerprint,
 )
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
@@ -20,7 +21,7 @@ from router_controller.router_comms.exceptions import (
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
 
-TEST_HOST_KEY_FINGERPRINT = "aabbccdd"
+TEST_HOST_KEY_FINGERPRINT = "SHA256:test-fingerprint"
 
 @pytest.fixture
 def connection_config() -> RouterConnectionConfig:
@@ -264,9 +265,10 @@ def test_host_key_fingerprint(
     transport = MagicMock()
 
     host_key = MagicMock()
-    host_key.get_fingerprint.return_value = (
-        b"\xaa\xbb\xcc\xdd"
-    )
+    host_key.asbytes.return_value = b"test-host-key"
+    #host_key.get_fingerprint.return_value = (
+    #    b"\xaa\xbb\xcc\xdd"
+    #)
     
     #host_key = paramiko.RSAKey.generate(2048)
     transport.get_remote_server_key.return_value = host_key
@@ -284,9 +286,10 @@ def test_host_key_fingerprint(
 
         fingerprint = connection.host_key_fingerprint
 
-        assert connection.host_key_fingerprint == "aabbccdd"
+        assert connection.host_key_fingerprint == host_key_fingerprint(host_key)
+        #assert connection.host_key_fingerprint == "aabbccdd"
     #assert fingerprint is not None
-    #assert fingerprint.startswith("SHA256:")
+    assert fingerprint.startswith("SHA256:")
 
 def test_host_key_fingerprint_requires_connection(
     candidate: RouterCandidate,
@@ -297,24 +300,38 @@ def test_host_key_fingerprint_requires_connection(
     assert connection.host_key_fingerprint is None
 
 def test_host_key_policy_accepts_matching_fingerprint():
-    expected = "aabbccdd"
+    key = MagicMock()
+    key.asbytes.return_value = b"test-host-key"
 
+    expected = host_key_fingerprint(key)
     policy = RouterHostKeyPolicy(expected)
 
-    client = MagicMock()
-    key = MagicMock()
+    #expected = "aabbccdd"
 
-    key.get_fingerprint.return_value = (
-        b"\xaa\xbb\xcc\xdd"
-    )
+    #policy = RouterHostKeyPolicy(expected)
+
+    #client = MagicMock()
+    #key = MagicMock()
+
+    #key.get_fingerprint.return_value = (
+    #    b"\xaa\xbb\xcc\xdd"
+    #)
 
     policy.missing_host_key(
-        client,
+        #client,
+        MagicMock(),
         "192.168.50.1",
         key,
     )
 
 def test_host_key_policy_rejects_mismatched_fingerprint():
+    key = MagicMock()
+    key.asbytes.return_value = b"actual-host-key"
+
+    policy = RouterHostKeyPolicy(
+        "SHA256:not-the-real-fingerprint"
+    )
+    '''
     policy = RouterHostKeyPolicy("aabbccdd")
 
     client = MagicMock()
@@ -323,11 +340,12 @@ def test_host_key_policy_rejects_mismatched_fingerprint():
     key.get_fingerprint.return_value = (
         b"\x11\x22\x33\x44"
     )
-
+    '''
     #with pytest.raises(paramiko.SSHException):
     with pytest.raises(RouterIdentityError):
         policy.missing_host_key(
-            client,
+            #client,
+            MagicMock(),
             "192.168.50.1",
             key,
         )
@@ -351,7 +369,8 @@ def test_connect_uses_expected_host_key_fingerprint(
             candidate,
             key_pair,
             RouterConnectionConfig(
-                expected_host_key_fingerprint="aabbccdd",
+                expected_host_key_fingerprint="SHA256:test-fingerprint"
+                #expected_host_key_fingerprint="aabbccdd",
             ),
         )
 
@@ -360,7 +379,8 @@ def test_connect_uses_expected_host_key_fingerprint(
     policy = client.set_missing_host_key_policy.call_args.args[0]
 
     assert isinstance(policy, RouterHostKeyPolicy)
-    assert policy.expected_fingerprint == "aabbccdd"
+    assert policy.expected_fingerprint == "SHA256:test-fingerprint"
+    #assert policy.expected_fingerprint == "aabbccdd"
 
 def test_connect_rejects_unknown_host_key(
     candidate: RouterCandidate,
@@ -387,17 +407,28 @@ def test_connect_rejects_unknown_host_key(
     client.close.assert_not_called()
 
 def test_host_key_policy_accepts_uppercase_expected_fingerprint():
+    key = MagicMock()
+    key.asbytes.return_value = b"test-host-key"
+
+    expected = host_key_fingerprint(key)
+
+    policy = RouterHostKeyPolicy(
+        f"  {expected}  "
+    )
+    '''
     policy = RouterHostKeyPolicy("AABBCCDD")
 
     client = MagicMock()
     key = MagicMock()
 
-    key.get_fingerprint.return_value = (
+    key.asbytes.return_value = (
+    #key.get_fingerprint.return_value = (
         b"\xaa\xbb\xcc\xdd"
     )
-
+    '''
     policy.missing_host_key(
-        client,
+        MagicMock(),
+        #client,
         "192.168.50.1",
         key,
     )
@@ -416,7 +447,8 @@ def test_connect_installs_host_key_verification_policy(
             candidate,
             key_pair,
             RouterConnectionConfig(
-                expected_host_key_fingerprint="aabbccdd",
+                expected_host_key_fingerprint="SHA256:test-fingerprint"
+                #expected_host_key_fingerprint="aabbccdd",
             ),
         )
 
@@ -429,6 +461,7 @@ def test_connect_installs_host_key_verification_policy(
     )
 
     assert isinstance(policy, RouterHostKeyPolicy)
+    assert policy.expected_fingerprint == "SHA256:test-fingerprint"
     assert policy.expected_fingerprint == "aabbccdd"
 
 def test_connect_rejects_mismatched_host_key(
@@ -445,7 +478,8 @@ def test_connect_rejects_mismatched_host_key(
         policy = client.set_missing_host_key_policy.call_args.args[0]
 
         key = MagicMock()
-        key.get_fingerprint.return_value = (
+        key.asbytes.return_value = (
+        #key.get_fingerprint.return_value = (
             b"\x11\x22\x33\x44"
         )
 
@@ -465,7 +499,8 @@ def test_connect_rejects_mismatched_host_key(
             candidate,
             key_pair,
             RouterConnectionConfig(
-                expected_host_key_fingerprint="aabbccdd",
+                expected_host_key_fingerprint="SHA256:test-fingerprint"
+                #expected_host_key_fingerprint="aabbccdd",
             ),
         )
 
@@ -481,21 +516,38 @@ def test_connect_accepts_matching_host_key(
     key_pair: SSHKeyPair,
 ):
     client = MagicMock()
+    key = MagicMock()
+    key.asbytes.return_value = b"\xaa\xbb\xcc\xdd"
+
+    expected = host_key_fingerprint(key)
 
     def connect_side_effect(**kwargs):
         policy = client.set_missing_host_key_policy.call_args.args[0]
-
-        key = MagicMock()
-        key.get_fingerprint.return_value = (
-            b"\xaa\xbb\xcc\xdd"
-        )
 
         policy.missing_host_key(
             client,
             candidate.address,
             key,
         )
+    '''
+    def connect_side_effect(**kwargs):
+        policy = client.set_missing_host_key_policy.call_args.args[0]
 
+        key = MagicMock()
+        key.asbytes.return_value = (
+        #key.get_fingerprint.return_value = (
+            b"\xaa\xbb\xcc\xdd"
+        )
+        expected = host_key_fingerprint(key)
+
+        assert policy.expected_fingerprint == expected
+
+        policy.missing_host_key(
+            client,
+            candidate.address,
+            key,
+        )
+        '''
     client.connect.side_effect = connect_side_effect
 
     transport = MagicMock()
@@ -510,7 +562,7 @@ def test_connect_accepts_matching_host_key(
             candidate,
             key_pair,
             RouterConnectionConfig(
-                expected_host_key_fingerprint="aabbccdd",
+                expected_host_key_fingerprint="aabbccdd"
             ),
         )
 

@@ -4,7 +4,8 @@ from dataclasses import dataclass
 #from pathlib import Path
 
 import paramiko
-#import hashlib
+import hashlib
+import base64
 
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
@@ -23,12 +24,39 @@ class RouterConnectionConfig:
     username: str = "root"
     timeout: float = 5.0
     expected_host_key_fingerprint: str | None = None
+'''
+def host_key_fingerprint(key: paramiko.PKey) -> str:
+    """Return an OpenSSH-style SHA256 fingerprint for an SSH host key."""
+
+    digest = hashlib.sha256(key.asbytes()).digest()
+    encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
+
+    return f"SHA256:{encoded}"
+'''
+@property
+def host_key_fingerprint(self) -> str | None:
+    """Return the SHA256 fingerprint of the connected router's host key."""
+
+    if self._client is None:
+        return None
+
+    transport = self._client.get_transport()
+
+    if transport is None:
+        return None
+
+    host_key = transport.get_remote_server_key()
+
+    if host_key is None:
+        return None
+
+    return host_key_fingerprint(host_key)
 
 class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """Verify an SSH host key against an expected fingerprint."""
 
     def __init__(self, expected_fingerprint: str) -> None:
-        self.expected_fingerprint = expected_fingerprint.lower()
+        self.expected_fingerprint = expected_fingerprint.strip()
 
     def missing_host_key(
         self,
@@ -38,9 +66,11 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     ) -> None:
         """Accept the host key only when its fingerprint matches."""
 
-        fingerprint = key.get_fingerprint().hex().lower()
+        #fingerprint = key.get_fingerprint().hex().lower()
+        fingerprint = host_key_fingerprint(key)
 
         if fingerprint != self.expected_fingerprint:
+        #if fingerprint != self.expected_fingerprint:
             #raise paramiko.SSHException(
             raise RouterIdentityError(
                 f"Router host key fingerprint mismatch for {hostname}."
@@ -213,7 +243,8 @@ class RouterConnection:
         if host_key is None:
             return None
 
-        return host_key.get_fingerprint().hex()
+        return host_key_fingerprint(host_key)
+        #return host_key.get_fingerprint().hex()
         '''
         digest = hashlib.sha256(
             host_key.asbytes()
