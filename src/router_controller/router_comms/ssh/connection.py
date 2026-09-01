@@ -1,12 +1,10 @@
 """Persistent SSH connections to OpenWrt routers."""
 
-from dataclasses import dataclass
-#from pathlib import Path
-
 import paramiko
 import hashlib
 import base64
 
+from dataclasses import dataclass
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
@@ -25,33 +23,14 @@ class RouterConnectionConfig:
     timeout: float = 5.0
     expected_host_key_fingerprint: str | None = None
 
-def host_key_fingerprint(key: paramiko.PKey) -> str | None:
+def host_key_fingerprint(key: paramiko.PKey) -> str:
     """Return an OpenSSH-style SHA256 fingerprint for an SSH host key."""
 
     digest = hashlib.sha256(key.asbytes()).digest()
     encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
 
     return f"SHA256:{encoded}"
-'''
-@property
-def host_key_fingerprint(self) -> str | None:
-    """Return the SHA256 fingerprint of the connected router's host key."""
 
-    if self._client is None:
-        return None
-
-    transport = self._client.get_transport()
-
-    if transport is None:
-        return None
-
-    host_key = transport.get_remote_server_key()
-
-    if host_key is None:
-        return None
-
-    return host_key_fingerprint(host_key)
-    '''
 class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """Verify an SSH host key against an expected fingerprint."""
 
@@ -66,12 +45,9 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     ) -> None:
         """Accept the host key only when its fingerprint matches."""
 
-        #fingerprint = key.get_fingerprint().hex().lower()
         fingerprint = host_key_fingerprint(key)
 
         if fingerprint != self.expected_fingerprint:
-        #if fingerprint != self.expected_fingerprint:
-            #raise paramiko.SSHException(
             raise RouterIdentityError(
                 f"Router host key fingerprint mismatch for {hostname}."
             )
@@ -97,28 +73,6 @@ class RouterConnection:
         if self._client is not None:
             return
 
-        #client = paramiko.SSHClient()
-        # Host-key verification will be added before permanent
-        # router connections are enabled.
-        #client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        #Code below replaces the code above
-        '''
-        client = paramiko.SSHClient()
-
-        if self.config.expected_host_key_fingerprint is not None:
-            client.set_missing_host_key_policy(
-                RouterHostKeyPolicy(
-                    self.config.expected_host_key_fingerprint
-                )
-            )
-        else:
-            client.set_missing_host_key_policy(
-                paramiko.AutoAddPolicy()
-            )
-        '''
-        client = paramiko.SSHClient()
-
         expected_fingerprint = (
             self.config.expected_host_key_fingerprint
         )
@@ -127,6 +81,8 @@ class RouterConnection:
             raise RouterIdentityError(
                 "Router host-key fingerprint is not known."
             )
+        
+        client = paramiko.SSHClient()
 
         client.set_missing_host_key_policy(
             RouterHostKeyPolicy(expected_fingerprint)
@@ -208,18 +164,6 @@ class RouterConnection:
 
         return transport is not None and transport.is_active()
 
-    def __enter__(self) -> "RouterConnection":
-        self.connect()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: object,
-        exc_value: object,
-        traceback: object,
-    ) -> None:
-        self.close()
-
     @property
     def host_key_fingerprint(self) -> str | None:
         """Return the SHA256 fingerprint of the connected router's host key."""
@@ -238,3 +182,15 @@ class RouterConnection:
             return None
 
         return host_key_fingerprint(host_key)
+
+    def __enter__(self) -> "RouterConnection":
+        self.connect()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: object,
+        exc_value: object,
+        traceback: object,
+    ) -> None:
+        self.close()
