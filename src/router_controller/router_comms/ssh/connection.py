@@ -25,14 +25,14 @@ class RouterConnectionConfig:
     timeout: float = 5.0
     expected_host_key_fingerprint: str | None = None
 
-def host_key_fingerprint(key: paramiko.PKey) -> str:
+def host_key_fingerprint(key: paramiko.PKey) -> str | None:
     """Return an OpenSSH-style SHA256 fingerprint for an SSH host key."""
 
     digest = hashlib.sha256(key.asbytes()).digest()
     encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
 
     return f"SHA256:{encoded}"
-
+'''
 @property
 def host_key_fingerprint(self) -> str | None:
     """Return the SHA256 fingerprint of the connected router's host key."""
@@ -51,12 +51,12 @@ def host_key_fingerprint(self) -> str | None:
         return None
 
     return host_key_fingerprint(host_key)
-
+    '''
 class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """Verify an SSH host key against an expected fingerprint."""
 
     def __init__(self, expected_fingerprint: str) -> None:
-        self.expected_fingerprint = expected_fingerprint.strip()
+        self.expected_fingerprint = expected_fingerprint.strip().lower()
 
     def missing_host_key(
         self,
@@ -221,31 +221,16 @@ class RouterConnection:
         self.close()
 
     @property
-    def host_key_fingerprint(key: paramiko.PKey) -> str:
-        """Return an OpenSSH-style SHA256 fingerprint for a host key."""
-
-        digest = hashlib.sha256(key.asbytes()).digest()
-
-        encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
-
-        return f"SHA256:{encoded}"
-    '''
     def host_key_fingerprint(self) -> str | None:
         """Return the SHA256 fingerprint of the connected router's host key."""
 
         if self._client is None:
             return None
-            #raise RuntimeError(
-            #    "Router SSH connection has not been established."
-            #)
 
         transport = self._client.get_transport()
 
-        if transport is None: #or not transport.is_active():
+        if transport is None:
             return None
-            #raise RuntimeError(
-            #    "Router SSH connection is not active."
-            #)
 
         host_key = transport.get_remote_server_key()
 
@@ -253,22 +238,3 @@ class RouterConnection:
             return None
 
         return host_key_fingerprint(host_key)
-        #return host_key.get_fingerprint().hex()
-        ###
-        digest = hashlib.sha256(
-            host_key.asbytes()
-        ).digest()
-
-        #fingerprint = host_key.get_fingerprint()
-
-        import base64
-
-        #encoded = base64.b64encode(fingerprint).decode("ascii")
-
-        fingerprint = base64.b64encode(
-            digest
-        ).decode("ascii").rstrip("=")
-
-        #return f"SHA256:{encoded.rstrip('=').replace('+', '-').replace('/', '_')}"
-        return f"SHA256:{fingerprint}"
-        '''

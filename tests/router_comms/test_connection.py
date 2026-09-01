@@ -560,7 +560,8 @@ def test_connect_accepts_matching_host_key(
             candidate,
             key_pair,
             RouterConnectionConfig(
-                expected_host_key_fingerprint="aabbccdd"
+                expected_host_key_fingerprint=expected
+                #expected_host_key_fingerprint="aabbccdd"
             ),
         )
 
