@@ -105,3 +105,11 @@ class RouterConnectionManager:
             username=self.state.username,
             expected_host_key_fingerprint=self.state.ssh_host_key,
         )
+
+    def host_key_fingerprint(self) -> str | None:
+        """Return the fingerprint of the connected router."""
+
+        if self._connection is None:
+            return None
+
+        return self._connection.host_key_fingerprint

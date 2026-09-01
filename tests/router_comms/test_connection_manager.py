@@ -268,3 +268,23 @@ def test_connection_manager_uses_persisted_host_key(
 
     assert config.username == "root"
     assert config.expected_host_key_fingerprint == "aabbccdd"
+
+def test_host_key_fingerprint_returns_connection_fingerprint(
+    candidate,
+    key_pair,
+):
+    connection = MagicMock()
+    connection.connected = True
+    connection.host_key_fingerprint = "aabbccdd"
+
+    factory = MagicMock(return_value=connection)
+
+    manager = RouterConnectionManager(
+        candidate,
+        key_pair,
+        connection_factory=factory,
+    )
+
+    manager.connect()
+
+    assert manager.host_key_fingerprint() == "aabbccdd"
