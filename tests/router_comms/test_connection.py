@@ -430,3 +430,48 @@ def test_connect_installs_host_key_verification_policy(
 
     assert isinstance(policy, RouterHostKeyPolicy)
     assert policy.expected_fingerprint == "aabbccdd"
+
+def test_connect_rejects_mismatched_host_key(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+
+    policy = None
+
+    def connect_side_effect(**kwargs):
+        nonlocal policy
+
+        policy = client.set_missing_host_key_policy.call_args.args[0]
+
+        key = MagicMock()
+        key.get_fingerprint.return_value = (
+            b"\x11\x22\x33\x44"
+        )
+
+        policy.missing_host_key(
+            client,
+            candidate.address,
+            key,
+        )
+
+    client.connect.side_effect = connect_side_effect
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(
+            candidate,
+            key_pair,
+            RouterConnectionConfig(
+                expected_host_key_fingerprint="aabbccdd",
+            ),
+        )
+
+        with pytest.raises(RouterIdentityError):
+            connection.connect()
+
+    assert connection.connected is False
+    assert connection._client is None
+    client.close.assert_called_once()
