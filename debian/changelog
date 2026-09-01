@@ -1,3 +1,10 @@
+router-pi-controller (0.4.2) unstable; urgency=medium
+
+  * Fixing Connection and Tests
+  * Applied new SHA key logic
+
+ -- OpenWrt Pi Controller Project <Need_Email@willgethere.me>  Tue, 01 Sep 2026 20:26:00 +0100
+
 router-pi-controller (0.4.1) unstable; urgency=medium
 
   * Ready to test authentication SSH on router
