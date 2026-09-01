@@ -410,7 +410,7 @@ def test_host_key_policy_accepts_uppercase_expected_fingerprint():
     key = MagicMock()
     key.asbytes.return_value = b"test-host-key"
 
-    expected = host_key_fingerprint(key).casefold()#.upper()
+    expected = host_key_fingerprint(key).upper()
 
     policy = RouterHostKeyPolicy(expected)
 

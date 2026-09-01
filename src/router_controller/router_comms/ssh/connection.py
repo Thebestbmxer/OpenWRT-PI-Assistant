@@ -45,7 +45,7 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     ) -> None:
         """Accept the host key only when its fingerprint matches."""
 
-        fingerprint = host_key_fingerprint(key)
+        fingerprint = host_key_fingerprint(key).casefold()
 
         if fingerprint != self.expected_fingerprint:
             raise RouterIdentityError(
