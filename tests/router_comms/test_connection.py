@@ -401,3 +401,32 @@ def test_host_key_policy_accepts_uppercase_expected_fingerprint():
         "192.168.50.1",
         key,
     )
+
+def test_connect_installs_host_key_verification_policy(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(
+            candidate,
+            key_pair,
+            RouterConnectionConfig(
+                expected_host_key_fingerprint="aabbccdd",
+            ),
+        )
+
+        connection.connect()
+
+    client.set_missing_host_key_policy.assert_called_once()
+
+    policy = (
+        client.set_missing_host_key_policy.call_args.args[0]
+    )
+
+    assert isinstance(policy, RouterHostKeyPolicy)
+    assert policy.expected_fingerprint == "aabbccdd"
