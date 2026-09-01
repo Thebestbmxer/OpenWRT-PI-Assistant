@@ -20,6 +20,13 @@ from router_controller.router_comms.exceptions import (
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
 
+TEST_HOST_KEY_FINGERPRINT = "aabbccdd"
+
+@pytest.fixture
+def connection_config() -> RouterConnectionConfig:
+    return RouterConnectionConfig(
+        expected_host_key_fingerprint=TEST_HOST_KEY_FINGERPRINT,
+    )
 
 @pytest.fixture
 def candidate() -> RouterCandidate:
@@ -41,6 +48,7 @@ def key_pair(tmp_path: Path) -> SSHKeyPair:
 def test_connect_uses_controller_private_key(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
 
@@ -48,7 +56,7 @@ def test_connect_uses_controller_private_key(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair,connection_config)
 
         connection.connect()
 
@@ -66,6 +74,7 @@ def test_connect_uses_controller_private_key(
 def test_connect_marks_connection_active(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     transport = MagicMock()
@@ -76,7 +85,7 @@ def test_connect_marks_connection_active(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         connection.connect()
 
@@ -86,6 +95,7 @@ def test_connect_marks_connection_active(
 def test_execute_returns_command_result(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
 
@@ -107,7 +117,7 @@ def test_execute_returns_command_result(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
         connection.connect()
 
         output, error, status = connection.execute(
@@ -136,6 +146,7 @@ def test_execute_requires_connection(
 def test_connection_error_is_wrapped(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     client.connect.side_effect = OSError("connection refused")
@@ -144,7 +155,7 @@ def test_connection_error_is_wrapped(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         with pytest.raises(InitialCommunicationError):
             connection.connect()
@@ -155,6 +166,7 @@ def test_connection_error_is_wrapped(
 def test_authentication_error_is_wrapped(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     client.connect.side_effect = paramiko.AuthenticationException()
@@ -163,7 +175,7 @@ def test_authentication_error_is_wrapped(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         with pytest.raises(InitialCommunicationError):
             connection.connect()
@@ -174,6 +186,7 @@ def test_authentication_error_is_wrapped(
 def test_close_disconnects_client(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
 
@@ -181,7 +194,7 @@ def test_close_disconnects_client(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         connection.connect()
         connection.close()
@@ -192,6 +205,7 @@ def test_close_disconnects_client(
 def test_connect_does_not_reconnect_when_already_connected(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
 
@@ -199,9 +213,8 @@ def test_connect_does_not_reconnect_when_already_connected(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
-        connection.connect()
         connection.connect()
 
     client.connect.assert_called_once()
@@ -209,8 +222,9 @@ def test_connect_does_not_reconnect_when_already_connected(
 def test_close_is_safe_when_not_connected(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
-    connection = RouterConnection(candidate, key_pair)
+    connection = RouterConnection(candidate, key_pair, connection_config)
 
     connection.close()
 
@@ -219,6 +233,7 @@ def test_close_is_safe_when_not_connected(
 def test_connected_reflects_inactive_transport(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     transport = MagicMock()
@@ -230,7 +245,7 @@ def test_connected_reflects_inactive_transport(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         connection.connect()
 
@@ -243,6 +258,7 @@ def test_connected_reflects_inactive_transport(
 def test_host_key_fingerprint(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     transport = MagicMock()
@@ -262,7 +278,7 @@ def test_host_key_fingerprint(
         "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
         return_value=client,
     ):
-        connection = RouterConnection(candidate, key_pair)
+        connection = RouterConnection(candidate, key_pair, connection_config)
 
         connection.connect()
 
@@ -319,6 +335,7 @@ def test_host_key_policy_rejects_mismatched_fingerprint():
 def test_connect_uses_expected_host_key_fingerprint(
     candidate: RouterCandidate,
     key_pair: SSHKeyPair,
+    connection_config: RouterConnectionConfig,
 ):
     client = MagicMock()
     transport = MagicMock()
