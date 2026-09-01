@@ -24,7 +24,7 @@ class RouterConnectionConfig:
     username: str = "root"
     timeout: float = 5.0
     expected_host_key_fingerprint: str | None = None
-'''
+
 def host_key_fingerprint(key: paramiko.PKey) -> str:
     """Return an OpenSSH-style SHA256 fingerprint for an SSH host key."""
 
@@ -32,7 +32,7 @@ def host_key_fingerprint(key: paramiko.PKey) -> str:
     encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
 
     return f"SHA256:{encoded}"
-'''
+
 @property
 def host_key_fingerprint(self) -> str | None:
     """Return the SHA256 fingerprint of the connected router's host key."""
