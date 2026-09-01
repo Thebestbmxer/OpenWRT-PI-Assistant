@@ -221,6 +221,15 @@ class RouterConnection:
         self.close()
 
     @property
+    def host_key_fingerprint(key: paramiko.PKey) -> str:
+        """Return an OpenSSH-style SHA256 fingerprint for a host key."""
+
+        digest = hashlib.sha256(key.asbytes()).digest()
+
+        encoded = base64.b64encode(digest).decode("ascii").rstrip("=")
+
+        return f"SHA256:{encoded}"
+    '''
     def host_key_fingerprint(self) -> str | None:
         """Return the SHA256 fingerprint of the connected router's host key."""
 
@@ -245,7 +254,7 @@ class RouterConnection:
 
         return host_key_fingerprint(host_key)
         #return host_key.get_fingerprint().hex()
-        '''
+        ###
         digest = hashlib.sha256(
             host_key.asbytes()
         ).digest()

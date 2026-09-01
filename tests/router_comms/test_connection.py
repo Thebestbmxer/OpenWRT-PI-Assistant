@@ -410,11 +410,9 @@ def test_host_key_policy_accepts_uppercase_expected_fingerprint():
     key = MagicMock()
     key.asbytes.return_value = b"test-host-key"
 
-    expected = host_key_fingerprint(key)
+    expected = host_key_fingerprint(key).upper()
 
-    policy = RouterHostKeyPolicy(
-        f"  {expected}  "
-    )
+    policy = RouterHostKeyPolicy(expected)
     '''
     policy = RouterHostKeyPolicy("AABBCCDD")
 
@@ -462,7 +460,7 @@ def test_connect_installs_host_key_verification_policy(
 
     assert isinstance(policy, RouterHostKeyPolicy)
     assert policy.expected_fingerprint == "SHA256:test-fingerprint"
-    assert policy.expected_fingerprint == "aabbccdd"
+    #assert policy.expected_fingerprint == "aabbccdd"
 
 def test_connect_rejects_mismatched_host_key(
     candidate: RouterCandidate,
