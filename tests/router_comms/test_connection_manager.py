@@ -8,6 +8,10 @@ import pytest
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
+from router_controller.router_comms.ssh.connection import (
+    RouterConnection,
+    RouterConnectionConfig,
+)
 from router_controller.router_comms.ssh.connection_manager import (
     RouterConnectionManager,
 )
@@ -55,7 +59,20 @@ def test_connect_creates_and_connects_connection(
 
     result = manager.connect()
 
-    factory.assert_called_once_with(candidate, key_pair)
+    #factory.assert_called_once_with(candidate, key_pair)
+    factory.assert_called_once()
+
+    args = factory.call_args.args
+
+    assert args[0] == candidate
+    assert args[1] == key_pair
+
+    config = args[2]
+
+    assert isinstance(config, RouterConnectionConfig)
+    assert config.username == "root"
+    assert config.expected_host_key_fingerprint is None
+
     connection.connect.assert_called_once()
 
     assert result is connection
@@ -83,7 +100,19 @@ def test_connect_reuses_active_connection(
     assert first is connection
     assert second is connection
 
-    factory.assert_called_once_with(candidate, key_pair)
+    #factory.assert_called_once_with(candidate, key_pair)
+    factory.assert_called_once()
+
+    args = factory.call_args.args
+
+    assert args[0] == candidate
+    assert args[1] == key_pair
+
+    config = args[2]
+
+    assert isinstance(config, RouterConnectionConfig)
+    assert config.expected_host_key_fingerprint is None
+
     connection.connect.assert_called_once()
 
 
