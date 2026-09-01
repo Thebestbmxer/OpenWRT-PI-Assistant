@@ -4,7 +4,7 @@
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_test:
-	python3 -m pytest -v
+        PYTHONPATH=$(CURDIR)/src python3 -m pytest -v
 
 override_dh_auto_install:
 	dh_auto_install
