@@ -39,3 +39,6 @@ class HostKeyError(RouterCommsError):
 
 class RouterProbeError(RouterCommsError):
     """Raised when the read-only router probe fails."""
+
+class RouterIdentityError(Exception):
+    """Raised when a router's SSH identity cannot be verified."""

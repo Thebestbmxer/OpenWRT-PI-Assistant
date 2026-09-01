@@ -16,6 +16,7 @@ from router_controller.router_comms.discovery.router_discovery import (
 )
 from router_controller.router_comms.exceptions import (
     InitialCommunicationError,
+    RouterIdentityError,
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
 
@@ -307,7 +308,8 @@ def test_host_key_policy_rejects_mismatched_fingerprint():
         b"\x11\x22\x33\x44"
     )
 
-    with pytest.raises(paramiko.SSHException):
+    #with pytest.raises(paramiko.SSHException):
+    with pytest.raises(RouterIdentityError):
         policy.missing_host_key(
             client,
             "192.168.50.1",
@@ -343,3 +345,42 @@ def test_connect_uses_expected_host_key_fingerprint(
     assert isinstance(policy, RouterHostKeyPolicy)
     assert policy.expected_fingerprint == "aabbccdd"
 
+def test_connect_rejects_unknown_host_key(
+    candidate: RouterCandidate,
+    key_pair: SSHKeyPair,
+):
+    client = MagicMock()
+
+    with patch(
+        "router_controller.router_comms.ssh.connection.paramiko.SSHClient",
+        return_value=client,
+    ):
+        connection = RouterConnection(
+            candidate,
+            key_pair,
+            RouterConnectionConfig(
+                expected_host_key_fingerprint=None,
+            ),
+        )
+
+        with pytest.raises(RouterIdentityError):
+            connection.connect()
+
+    client.connect.assert_not_called()
+    client.close.assert_not_called()
+
+def test_host_key_policy_accepts_uppercase_expected_fingerprint():
+    policy = RouterHostKeyPolicy("AABBCCDD")
+
+    client = MagicMock()
+    key = MagicMock()
+
+    key.get_fingerprint.return_value = (
+        b"\xaa\xbb\xcc\xdd"
+    )
+
+    policy.missing_host_key(
+        client,
+        "192.168.50.1",
+        key,
+    )

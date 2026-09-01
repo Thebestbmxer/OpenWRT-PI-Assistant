@@ -1,16 +1,17 @@
 """Persistent SSH connections to OpenWrt routers."""
 
 from dataclasses import dataclass
-from pathlib import Path
+#from pathlib import Path
 
 import paramiko
-import hashlib
+#import hashlib
 
 from router_controller.router_comms.discovery.router_discovery import (
     RouterCandidate,
 )
 from router_controller.router_comms.exceptions import (
     InitialCommunicationError,
+    RouterIdentityError,
 )
 from router_controller.router_comms.ssh.keys import SSHKeyPair
 
@@ -40,7 +41,8 @@ class RouterHostKeyPolicy(paramiko.MissingHostKeyPolicy):
         fingerprint = key.get_fingerprint().hex().lower()
 
         if fingerprint != self.expected_fingerprint:
-            raise paramiko.SSHException(
+            #raise paramiko.SSHException(
+            raise RouterIdentityError(
                 f"Router host key fingerprint mismatch for {hostname}."
             )
 
@@ -71,6 +73,7 @@ class RouterConnection:
         #client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         #Code below replaces the code above
+        '''
         client = paramiko.SSHClient()
 
         if self.config.expected_host_key_fingerprint is not None:
@@ -83,7 +86,21 @@ class RouterConnection:
             client.set_missing_host_key_policy(
                 paramiko.AutoAddPolicy()
             )
+        '''
+        client = paramiko.SSHClient()
 
+        expected_fingerprint = (
+            self.config.expected_host_key_fingerprint
+        )
+
+        if expected_fingerprint is None:
+            raise RouterIdentityError(
+                "Router host-key fingerprint is not known."
+            )
+
+        client.set_missing_host_key_policy(
+            RouterHostKeyPolicy(expected_fingerprint)
+        )
 
         try:
             client.connect(
